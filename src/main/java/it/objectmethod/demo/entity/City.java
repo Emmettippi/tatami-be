@@ -7,13 +7,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Entity // Indica che questa classe e' un Entita' JPA
-@Table(name = "city") // Indichiamo il nome della tabella a DB a cui fa riferimento questa entita
+@Entity
+@Table(name = "city")
 public class City {
 
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	// Valore generato e assegnato dal DB
-	@Id // Indica che e' la chiave primaria
+	@Id
 	private Long id;
 
 	@Column(name = "Name") // Colonna relativa a DB

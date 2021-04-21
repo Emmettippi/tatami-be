@@ -21,9 +21,7 @@ public class CityController {
 
 	@GetMapping("/{id}/find")
 	public City findCityById(@PathVariable("id") Long id) {
-		Optional<City> optCity = cityRepo.findById(id);// Metodo offerto gratis da JPA
-		// Altri metodi offerti gratis sono save, delete, findAll, exists ...
-
+		Optional<City> optCity = cityRepo.findById(id);
 		City city = null;
 		if (optCity.isPresent()) {
 			city = optCity.get();
@@ -65,5 +63,4 @@ public class CityController {
 		List<City> cities = cityRepo.findByCodiceNazione("ITA");
 		return cities;
 	}
-
 }
