@@ -1,4 +1,4 @@
-package it.objectmethod.demo.repository;
+package it.objectmethod.tatami.repository;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import it.objectmethod.demo.entity.City;
+import it.objectmethod.tatami.entity.City;
 
 @Repository
 public interface CityRepository extends JpaRepository<City, Long> { 

@@ -1,4 +1,4 @@
-package it.objectmethod.demo.controller;
+package it.objectmethod.tatami.controller;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import it.objectmethod.demo.entity.City;
-import it.objectmethod.demo.repository.CityRepository;
+import it.objectmethod.tatami.entity.City;
+import it.objectmethod.tatami.repository.CityRepository;
 
 @RestController
 @RequestMapping("/api/city")
