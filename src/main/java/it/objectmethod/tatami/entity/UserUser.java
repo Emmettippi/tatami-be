@@ -25,11 +25,11 @@ public class UserUser {
 
 	@ManyToOne
 	@JoinColumn(nullable = false, name = "user_1_id")
-	private User user1Id;
+	private User user1;
 
 	@ManyToOne
 	@JoinColumn(nullable = false, name = "user_2_id")
-	private User user2Id;
+	private User user2;
 
 	@Column(name = "relationship")
 	@Enumerated(EnumType.STRING)
