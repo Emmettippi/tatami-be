@@ -20,4 +20,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	User findByUsernameAndPassword(String username, String password);
 
 	List<User> findByNicknameContains(String nickname);
+
+	@Query(nativeQuery = true, value = "SELECT u.* \n"
+		+ "FROM user_info u \n"
+		+ "  JOIN user_user uu ON u.id = uu.user_1_id \n"
+		+ "WHERE uu.relationship = :relationShip \n"
+		+ "  AND u.id = :userId")
+	List<User> findByUserIdAndRelation(@Param("userId") Long user1Id, @Param("relationShip") String relationShip);
+
+	@Query(nativeQuery = true, value = "SELECT u.* \n"
+		+ "FROM user_info u \n"
+		+ "  JOIN user_user uu ON u.id = uu.user_2_id \n"
+		+ "WHERE uu.relationship = :relationShip \n"
+		+ "  AND u.id = :userId")
+	List<User> findByUserId2AndRelation(@Param("userId") Long user2Id, @Param("relationShip") String relationShip);
 }

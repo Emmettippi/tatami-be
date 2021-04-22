@@ -40,8 +40,8 @@ public class UserController {
 	}
 
 	@PutMapping("/{id}")
-	public UserDto getOne(@PathVariable Long id) {
-		return userService.getOne(id);
+	public UserDto getOne(@PathVariable Long id, @RequestBody UserDto body) {
+		return userService.getOne(id, body);
 	}
 
 	@DeleteMapping("/delete")

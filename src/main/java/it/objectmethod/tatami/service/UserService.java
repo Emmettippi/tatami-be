@@ -10,6 +10,7 @@ import it.objectmethod.tatami.controller.dto.LoginDto;
 import it.objectmethod.tatami.dto.UserDto;
 import it.objectmethod.tatami.dto.mapper.UserMapper;
 import it.objectmethod.tatami.entity.User;
+import it.objectmethod.tatami.entity.enums.UserRelation;
 import it.objectmethod.tatami.entity.enums.UserStatus;
 import it.objectmethod.tatami.repository.UserRepository;
 import it.objectmethod.tatami.utils.Utils;
@@ -49,12 +50,8 @@ public class UserService {
 	}
 
 	public UserDto update(UserDto dto) {
-		if (dto == null || dto.getId() == null) {
-			return dto;
-		}
-		User old = userRepository.getOne(dto.getId());
 		User user = null;
-		if (old.getPassword().equals(dto.getPassword())) {
+		if (this.checkMyself(dto)) {
 			user = userMapper.toEntity(dto);
 			if (!Utils.isBlank(dto.getNewPassword())) {
 				String md5NewPass = userRepository.md5Password(dto.getNewPassword());
@@ -67,8 +64,18 @@ public class UserService {
 		return userMapper.toDto(user);
 	}
 
-	public UserDto getOne(Long id) {
-		if (id == null) {
+	public UserDto getOne(Long id, UserDto mySelf) {
+		if (id == null || !this.checkMyself(mySelf)) {
+			return null;
+		}
+		boolean blocked = false;
+		List<User> blockers = userRepository.findByUserId2AndRelation(mySelf.getId(), UserRelation.BLOCKED.name());
+		for (User u : blockers) {
+			if (u.getId().equals(id)) {
+				blocked = true;
+			}
+		}
+		if (blocked) {
 			return null;
 		}
 		User user = userRepository.getOne(id);
@@ -79,7 +86,7 @@ public class UserService {
 	}
 
 	public void delete(UserDto dto) {
-		if (dto == null || dto.getId() == null) {
+		if (!this.checkMyself(dto)) {
 			return;
 		}
 		User old = userRepository.getOne(dto.getId());
@@ -95,5 +102,34 @@ public class UserService {
 			return new ArrayList<>();
 		}
 		return userMapper.toDto(userRepository.findByNicknameContains(nickname));
+	}
+
+	public List<UserDto> getFriends(Long id, UserDto mySelf) {
+		if (!this.checkMyself(mySelf)) {
+			return null;
+		}
+		return userMapper.toDto(userRepository.findByUserIdAndRelation(id, UserRelation.FRIEND.name()));
+	}
+
+	public List<UserDto> getAskingFriends(Long id, UserDto mySelf) {
+		if (!this.checkMyself(mySelf)) {
+			return null;
+		}
+		return userMapper.toDto(userRepository.findByUserIdAndRelation(id, UserRelation.ASKING_FRIENDSHIP.name()));
+	}
+
+	public List<UserDto> getPendingFriendRequests(Long id, UserDto mySelf) {
+		if (!this.checkMyself(mySelf)) {
+			return null;
+		}
+		return userMapper.toDto(userRepository.findByUserIdAndRelation(id, UserRelation.PENDING_FRIENDSHIP.name()));
+	}
+
+	private boolean checkMyself(UserDto mySelf) {
+		if (mySelf == null || mySelf.getId() == null) {
+			return false;
+		}
+		User old = userRepository.getOne(mySelf.getId());
+		return old != null && old.getPassword().equals(mySelf.getPassword());
 	}
 }
