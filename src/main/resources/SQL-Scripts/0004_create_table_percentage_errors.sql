@@ -1,4 +1,4 @@
-CREATE TABLE dbo.percentage_errors(
+CREATE TABLE percentage_errors(
 	id BIGINT AUTO_INCREMENT NOT NULL
 	, message_type VARCHAR(30) NOT NULL
 	, message_type_id BIGINT NOT NULL

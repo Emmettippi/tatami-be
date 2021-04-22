@@ -1,4 +1,4 @@
-CREATE TABLE dbo.percentage_progress(
+CREATE TABLE percentage_progress(
 	id BIGINT AUTO_INCREMENT NOT NULL
 	, operation VARCHAR(30) NOT NULL
 	, related_to BIGINT NOT NULL
