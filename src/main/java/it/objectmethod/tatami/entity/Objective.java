@@ -13,8 +13,8 @@ import it.objectmethod.tatami.entity.enums.ObjectiveType;
 import lombok.Data;
 
 @Data
-@Entity
-@Table(name = "objective")
+//@Entity
+//@Table(name = "objective")
 public class Objective {
 
 	@Id

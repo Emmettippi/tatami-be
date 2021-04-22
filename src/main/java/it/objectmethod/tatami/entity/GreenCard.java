@@ -14,8 +14,8 @@ import it.objectmethod.tatami.entity.enums.GreenCardType;
 import lombok.Data;
 
 @Data
-@Entity
-@Table(name = "green_card")
+//@Entity
+//@Table(name = "green_card")
 public class GreenCard {
 
 	@Id

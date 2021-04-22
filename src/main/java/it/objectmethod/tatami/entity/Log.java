@@ -13,8 +13,8 @@ import it.objectmethod.tatami.entity.enums.LogAction;
 import lombok.Data;
 
 @Data
-@Entity
-@Table(name = "log_game")
+//@Entity
+//@Table(name = "log_game")
 public class Log {
 
 	@Id

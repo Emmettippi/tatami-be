@@ -10,8 +10,8 @@ import javax.persistence.Table;
 import lombok.Data;
 
 @Data
-@Entity
-@Table(name = "player")
+//@Entity
+//@Table(name = "player")
 public class Player {
 
 	@Id

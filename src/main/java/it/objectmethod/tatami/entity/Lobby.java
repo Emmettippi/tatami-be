@@ -14,8 +14,8 @@ import javax.persistence.TemporalType;
 import lombok.Data;
 
 @Data
-@Entity
-@Table(name = "lobby")
+//@Entity
+//@Table(name = "lobby")
 public class Lobby {
 
 	@Id
