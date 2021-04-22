@@ -22,28 +22,28 @@ public class Lobby {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "user_id_1")
+	@Column(name = "user_1_id")
 	private Long userId1;
 
 	@Column(name = "last_in_lobby_1")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastInLobby1;
 
-	@Column(name = "user_id_2")
+	@Column(name = "user_2_id")
 	private Long userId2;
 
 	@Column(name = "last_in_lobby_2")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastInLobby2;
 
-	@Column(name = "user_id_3")
+	@Column(name = "user_3_id")
 	private Long userId3;
 
 	@Column(name = "last_in_lobby_3")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastInLobby3;
 
-	@Column(name = "user_id_4")
+	@Column(name = "user_4_id")
 	private Long userId4;
 
 	@Column(name = "last_in_lobby_4")

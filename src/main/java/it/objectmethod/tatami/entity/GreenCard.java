@@ -29,4 +29,10 @@ public class GreenCard {
 	@Column(name = "green_card_subtype")
 	@Enumerated(EnumType.STRING)
 	private GreenCardSubtype greenCardSubtype;
+
+	@Column(name = "cost")
+	private Long cost;
+
+	@Column(name = "description")
+	private String description;
 }

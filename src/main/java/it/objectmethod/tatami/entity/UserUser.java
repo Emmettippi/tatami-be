@@ -7,6 +7,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import it.objectmethod.tatami.entity.enums.UserRelation;
@@ -21,11 +23,13 @@ public class UserUser {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "user_id_1")
-	private Long userId1;
+	@ManyToOne
+	@JoinColumn(nullable = false, name = "user_1_id")
+	private User user1Id;
 
-	@Column(name = "user_id_2")
-	private Long userId2;
+	@ManyToOne
+	@JoinColumn(nullable = false, name = "user_2_id")
+	private User user2Id;
 
 	@Column(name = "relationship")
 	@Enumerated(EnumType.STRING)

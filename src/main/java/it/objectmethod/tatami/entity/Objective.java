@@ -24,4 +24,7 @@ public class Objective {
 	@Column(name = "objective_type")
 	@Enumerated(EnumType.STRING)
 	private ObjectiveType objectiveType;
+
+	@Column(name = "description")
+	private String description;
 }

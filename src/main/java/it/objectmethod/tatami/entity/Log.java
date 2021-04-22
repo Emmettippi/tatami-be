@@ -24,9 +24,16 @@ public class Log {
 	@Column(name = "game_id")
 	private Long gameId;
 
+	@Column(name = "log_number")
+	private Long logNumber;
+
 	@Column(name = "log_action")
 	@Enumerated(EnumType.STRING)
 	private LogAction logAction;
+
+	@Column(name = "log_status")
+	@Enumerated(EnumType.STRING)
+	private LogAction logStatus;
 
 	@Column(name = "num_param_1")
 	private Long numParam1;
