@@ -176,17 +176,17 @@ public class PercentageService {
 		return preparedPercentages;
 	}
 
-	/**
-	 * TODO HAS TO BE DONE Finds the percentages ready to be processed not locked,
-	 * WITH user clause
-	 * 
-	 * @param operations operations to check
-	 * @param userId the userId
-	 * @return percentages ready to be processed
-	 */
-	private List<Percentage> caseFindNotLockedByUser(List<PercentageOperation> operations, Long userId) {
-		return new ArrayList<>();
-	}
+	//	/**
+	//	 * TODO HAS TO BE DONE Finds the percentages ready to be processed not locked,
+	//	 * WITH user clause
+	//	 * 
+	//	 * @param operations operations to check
+	//	 * @param userId the userId
+	//	 * @return percentages ready to be processed
+	//	 */
+	//	private List<Percentage> caseFindNotLockedByUser(List<PercentageOperation> operations, Long userId) {
+	//		return new ArrayList<>();
+	//	}
 
 	public List<PercentageQueryParams> findByPercentageId(Long percentageId) {
 		if (percentageId == null) {

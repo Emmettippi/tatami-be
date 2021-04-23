@@ -4,15 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import it.objectmethod.tatami.controller.dto.LoginDto;
 import it.objectmethod.tatami.dto.UserDto;
 import it.objectmethod.tatami.dto.mapper.UserMapper;
 import it.objectmethod.tatami.entity.User;
+import it.objectmethod.tatami.entity.UserUser;
 import it.objectmethod.tatami.entity.enums.UserRelation;
 import it.objectmethod.tatami.entity.enums.UserStatus;
 import it.objectmethod.tatami.repository.UserRepository;
+import it.objectmethod.tatami.repository.UserUserRepository;
 import it.objectmethod.tatami.utils.Utils;
 
 @Service
@@ -20,6 +25,9 @@ public class UserService {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private UserUserRepository userUserRepository;
 
 	@Autowired
 	private UserMapper userMapper;
@@ -68,16 +76,13 @@ public class UserService {
 		if (id == null || !this.checkMyself(mySelf)) {
 			return null;
 		}
-		boolean blocked = false;
-		List<User> blockers = userRepository.findByUserId2AndRelation(mySelf.getId(), UserRelation.BLOCKED.name());
-		for (User u : blockers) {
-			if (u.getId().equals(id)) {
-				blocked = true;
-			}
-		}
-		if (blocked) {
+
+		UserUser blockedRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
+			id, mySelf.getId(), UserRelation.BLOCKED);
+		if (blockedRelation != null) {
 			return null;
 		}
+
 		User user = userRepository.getOne(id);
 		if (user != null) {
 			user.setPassword(null);
@@ -131,5 +136,15 @@ public class UserService {
 		}
 		User old = userRepository.getOne(mySelf.getId());
 		return old != null && old.getPassword().equals(mySelf.getPassword());
+	}
+
+	public long count() {
+		return this.userRepository.count();
+	}
+
+	public List<UserDto> findPaged(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		Page<User> users = this.userRepository.findAll(pageable);
+		return userMapper.toDto(users.getContent());
 	}
 }
