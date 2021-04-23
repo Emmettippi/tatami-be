@@ -47,7 +47,7 @@ public class ScheduledPercentage {
 	}
 
 	private void caseAskFiendship(Percentage p, int i, int size) {
-		userUserService.handleFriendship(p);
+		p = userUserService.handleFriendship(p);
 		log.info("Process {} at {}% in status {}", 100 * p.getProgression(), p.getProgressionStatus().name());
 		log.info("!!! --- End PercentageWorkerTask {} of {} with id: {} --- !!!", i + 1, size, p.getId());
 	}

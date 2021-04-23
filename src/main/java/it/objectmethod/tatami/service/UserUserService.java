@@ -33,7 +33,7 @@ public class UserUserService {
 	@Autowired
 	private PercentageService percentageService;
 
-	public boolean askFriendship(UserDto mySelf, Long askingUserId) {
+	public boolean askFriendship(Long askingUserId, UserDto mySelf) {
 		if (!this.checkMyself(mySelf)) {
 			return false;
 		}
@@ -53,6 +53,46 @@ public class UserUserService {
 		params.setIntegerParam2(askingUserId);
 		percentageService.prepareQueryParams(userMapper.toEntity(mySelf), params, PercentageOperation.ASK_FRIENDSHIP);
 		return true;
+	}
+
+	public void acceptFriendship(Long id, UserDto mySelf) {
+		if (!this.checkMyself(mySelf)) {
+			return;
+		}
+		UserUser pendingRelation = userUserRepository.getOne(id);
+		UserUser askingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
+			pendingRelation.getUser2().getId(), pendingRelation.getUser1().getId(), UserRelation.ASKING_FRIENDSHIP);
+		pendingRelation.setRelationship(UserRelation.FRIEND);
+		askingRelation.setRelationship(UserRelation.FRIEND);
+		userUserRepository.save(pendingRelation);
+		userUserRepository.save(askingRelation);
+	}
+
+	public void removeFriendship(Long relationId, UserDto mySelf) {
+		if (!this.checkMyself(mySelf)) {
+			return;
+		}
+		UserUser relation = userUserRepository.getOne(relationId);
+		UserUser friendRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
+			relation.getUser2().getId(), relation.getUser1().getId(), relation.getRelationship());
+		this.delete(relation.getId());
+		this.delete(friendRelation.getId());
+	}
+
+	public void blockUser(Long userId, UserDto mySelf) {
+		if (!this.checkMyself(mySelf)) {
+			return;
+		}
+		UserUser friendRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(mySelf.getId(), userId,
+			UserRelation.FRIEND);
+		if (friendRelation != null) {
+			this.removeFriendship(friendRelation.getId(), mySelf);
+		}
+		UserUser blockRelation = new UserUser();
+		blockRelation.setRelationship(UserRelation.BLOCKED);
+		blockRelation.setUser1(userRepository.getOne(mySelf.getId()));
+		blockRelation.setUser2(userRepository.getOne(mySelf.getId()));
+		userUserRepository.save(blockRelation);
 	}
 
 	private boolean checkMyself(UserDto mySelf) {
