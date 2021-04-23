@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 import it.objectmethod.tatami.dto.UserUserDto;
 import it.objectmethod.tatami.entity.UserUser;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public abstract class UserUserMapper {
 
 	@Mapping(target = "user1Id", source = "user1.id")

@@ -69,9 +69,9 @@ public class Percentage {
 	@Column(name = "progression_status")
 	private PercentageStatus progressionStatus;
 
-	@OneToMany(mappedBy = "percentage", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "percentage", fetch = FetchType.LAZY)
 	private List<PercentageError> percentageErrors;
 
-	@OneToMany(mappedBy = "percentage", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "percentage", fetch = FetchType.LAZY)
 	private List<PercentageQueryParams> percentageQueryParams;
 }
