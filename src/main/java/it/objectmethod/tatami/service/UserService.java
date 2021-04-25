@@ -25,10 +25,8 @@ public class UserService {
 
 	@Autowired
 	private UserRepository userRepository;
-
 	@Autowired
 	private UserUserRepository userUserRepository;
-
 	@Autowired
 	private UserMapper userMapper;
 
@@ -72,6 +70,13 @@ public class UserService {
 		return userMapper.toDto(user);
 	}
 
+	public UserDto forceGetOne(Long id) {
+		if (id == null) {
+			return null;
+		}
+		return userMapper.toDto(userRepository.getOne(id));
+	}
+
 	public UserDto getOne(Long id, UserDto mySelf) {
 		if (id == null || !this.checkMyself(mySelf)) {
 			return null;
@@ -96,7 +101,7 @@ public class UserService {
 		}
 		User old = userRepository.getOne(dto.getId());
 		if (old.getPassword().equals(dto.getPassword())) {
-			// TODO add userUser logic
+			userUserRepository.deleteByUserId(dto.getId());
 			userRepository.deleteById(dto.getId());
 		}
 		return;
@@ -130,7 +135,14 @@ public class UserService {
 		return userMapper.toDto(userRepository.findByUserIdAndRelation(id, UserRelation.PENDING_FRIENDSHIP.name()));
 	}
 
-	private boolean checkMyself(UserDto mySelf) {
+	public List<UserDto> getBlocked(Long id, UserDto mySelf) {
+		if (!this.checkMyself(mySelf)) {
+			return null;
+		}
+		return userMapper.toDto(userRepository.findByUserIdAndRelation(id, UserRelation.BLOCKED.name()));
+	}
+
+	public boolean checkMyself(UserDto mySelf) {
 		if (mySelf == null || mySelf.getId() == null) {
 			return false;
 		}
@@ -146,5 +158,14 @@ public class UserService {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<User> users = this.userRepository.findAll(pageable);
 		return userMapper.toDto(users.getContent());
+	}
+
+	public UserDto updateLastOnline(UserDto mySelf) {
+		if (!this.checkMyself(mySelf)) {
+			return null;
+		}
+		User user = userRepository.getOne(mySelf.getId());
+		user.setLastOnline(Utils.now());
+		return userMapper.toDto(userRepository.save(user));
 	}
 }

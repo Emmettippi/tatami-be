@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.objectmethod.tatami.controller.dto.LoginDto;
+import it.objectmethod.tatami.dto.MyRelationsDto;
 import it.objectmethod.tatami.dto.UserDto;
 import it.objectmethod.tatami.service.UserService;
 
@@ -52,5 +53,20 @@ public class UserController {
 	@GetMapping("/search/{nickname}")
 	public List<UserDto> search(@PathVariable String nickname) {
 		return userService.search(nickname);
+	}
+
+	@PostMapping("/update-last-online")
+	public UserDto updateLastOnline(@Validated @RequestBody UserDto mySelf) {
+		return userService.updateLastOnline(mySelf);
+	}
+
+	@GetMapping("/my-relations")
+	public MyRelationsDto search(@RequestBody UserDto mySelf) {
+		MyRelationsDto relations = new MyRelationsDto();
+		relations.setFriends(userService.getFriends(mySelf.getId(), mySelf));
+		relations.setAskingFriends(userService.getAskingFriends(mySelf.getId(), mySelf));
+		relations.setPendingFriends(userService.getPendingFriendRequests(mySelf.getId(), mySelf));
+		relations.setBlocked(userService.getBlocked(mySelf.getId(), mySelf));
+		return relations;
 	}
 }
