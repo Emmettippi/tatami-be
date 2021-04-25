@@ -32,9 +32,11 @@ public class UserUserService {
 	private UserUserMapper userUserMapper;
 	@Autowired
 	private PercentageService percentageService;
+	@Autowired
+	private UserService userService;
 
 	public boolean askFriendship(Long askingUserId, UserDto mySelf) {
-		if (!this.checkMyself(mySelf)) {
+		if (!this.userService.checkMyself(mySelf)) {
 			return false;
 		}
 		boolean blocked = false;
@@ -42,6 +44,7 @@ public class UserUserService {
 		for (User u : blockers) {
 			if (u.getId().equals(askingUserId)) {
 				blocked = true;
+				break;
 			}
 		}
 		if (blocked) {
@@ -56,7 +59,7 @@ public class UserUserService {
 	}
 
 	public void acceptFriendship(Long id, UserDto mySelf) {
-		if (!this.checkMyself(mySelf)) {
+		if (!this.userService.checkMyself(mySelf)) {
 			return;
 		}
 		UserUser pendingRelation = userUserRepository.getOne(id);
@@ -69,7 +72,7 @@ public class UserUserService {
 	}
 
 	public void removeFriendship(Long relationId, UserDto mySelf) {
-		if (!this.checkMyself(mySelf)) {
+		if (!this.userService.checkMyself(mySelf)) {
 			return;
 		}
 		UserUser relation = userUserRepository.getOne(relationId);
@@ -80,7 +83,7 @@ public class UserUserService {
 	}
 
 	public void blockUser(Long userId, UserDto mySelf) {
-		if (!this.checkMyself(mySelf)) {
+		if (!this.userService.checkMyself(mySelf)) {
 			return;
 		}
 		UserUser friendRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(mySelf.getId(), userId,
@@ -91,16 +94,15 @@ public class UserUserService {
 		UserUser blockRelation = new UserUser();
 		blockRelation.setRelationship(UserRelation.BLOCKED);
 		blockRelation.setUser1(userRepository.getOne(mySelf.getId()));
-		blockRelation.setUser2(userRepository.getOne(mySelf.getId()));
+		blockRelation.setUser2(userRepository.getOne(userId));
 		userUserRepository.save(blockRelation);
 	}
 
-	private boolean checkMyself(UserDto mySelf) {
-		if (mySelf == null || mySelf.getId() == null) {
-			return false;
+	public void unlockUser(Long relationId, UserDto mySelf) {
+		if (!this.userService.checkMyself(mySelf)) {
+			return;
 		}
-		User old = userRepository.getOne(mySelf.getId());
-		return old != null && old.getPassword().equals(mySelf.getPassword());
+		this.delete(relationId);
 	}
 
 	public Percentage handleFriendship(Percentage perc) {
@@ -153,6 +155,13 @@ public class UserUserService {
 		}
 		List<UserUser> relations = userUserRepository.findByUser1_IdAndUser2_Id(user1Id, user2Id);
 		return userUserMapper.toDto(relations);
+	}
+
+	public void onUserDelete(Long userId) {
+		if (userId == null) {
+			return;
+		}
+		userUserRepository.deleteByUserId(userId);
 	}
 
 	public void delete(Long id) {

@@ -39,4 +39,10 @@ public class RelationController {
 		userUserService.blockUser(userId, mySelf);
 		return true;
 	}
+
+	@PostMapping("/unlock-user/{relationId}")
+	public boolean unlock(@RequestBody UserDto mySelf, @PathVariable("relationId") Long relationId) {
+		userUserService.unlockUser(relationId, mySelf);
+		return true;
+	}
 }
