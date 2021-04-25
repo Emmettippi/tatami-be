@@ -61,6 +61,10 @@ public class PercentageService {
 				ops.add(PercentageOperation.ASK_FRIENDSHIP);
 				p = this.caseFindNotLockedWithoutUser(ops);
 				break;
+			case JOIN_LOBBY:
+				ops.add(PercentageOperation.JOIN_LOBBY);
+				p = this.caseFindNotLockedWithoutUser(ops);
+				break;
 			default:
 				p = null;
 			}
@@ -210,6 +214,7 @@ public class PercentageService {
 		perc.setPercentageQueryParams(queryParamsLs);
 
 		switch (operation) {
+		case JOIN_LOBBY:
 		case ASK_FRIENDSHIP:
 			perc.setLocked(Boolean.FALSE);
 			break;

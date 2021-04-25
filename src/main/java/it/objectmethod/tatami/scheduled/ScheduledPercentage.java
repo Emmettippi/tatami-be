@@ -2,7 +2,6 @@ package it.objectmethod.tatami.scheduled;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import it.objectmethod.tatami.entity.Percentage;
 import it.objectmethod.tatami.entity.enums.PercentageOperation;
+import it.objectmethod.tatami.service.LobbyService;
 import it.objectmethod.tatami.service.PercentageService;
 import it.objectmethod.tatami.service.UserUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +23,11 @@ public class ScheduledPercentage {
 	private PercentageService percentageService;
 	@Autowired
 	private UserUserService userUserService;
+	@Autowired
+	private LobbyService lobbyService;
 
 	public void doPercentage() {
-		List<PercentageOperation> operations = new ArrayList<>();
-		operations.add(PercentageOperation.ASK_FRIENDSHIP);
-
-		List<Percentage> percs = percentageService.checkPreparedTaskToRun(operations);
+		List<Percentage> percs = percentageService.checkPreparedTaskToRun(PercentageOperation.all());
 		for (int i = 0; i < percs.size(); i++) {
 			if (i == 0) {
 				log.info("Cron Percentage: Current Time - {}", FORMATTER.format(LocalDateTime.now()));
@@ -40,6 +39,9 @@ public class ScheduledPercentage {
 			case ASK_FRIENDSHIP:
 				this.caseAskFiendship(p, i, percs.size());
 				break;
+			case JOIN_LOBBY:
+				this.caseJoinLobby(p);
+				break;
 			default:
 				break;
 			}
@@ -48,7 +50,12 @@ public class ScheduledPercentage {
 
 	private void caseAskFiendship(Percentage p, int i, int size) {
 		p = userUserService.handleFriendship(p);
-		log.info("Process {} at {}% in status {}", 100 * p.getProgression(), p.getProgressionStatus().name());
+		log.info("Process {} at {}% in status {}", p.getId(), 100 * p.getProgression(),
+			p.getProgressionStatus().name());
 		log.info("!!! --- End PercentageWorkerTask {} of {} with id: {} --- !!!", i + 1, size, p.getId());
+	}
+
+	private void caseJoinLobby(Percentage p) {
+		p = lobbyService.handleJoinLobby(p);
 	}
 }

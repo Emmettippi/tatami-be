@@ -22,4 +22,14 @@ public class ScheduledTasks {
 	public void scheduledUserRelationBonification() {
 		scheduledBonification.userRelationBonification();
 	}
+
+	@Scheduled(cron = "${scheduler.cron.expression.user_offline}")
+	public void scheduledOfflineChecker() {
+		scheduledBonification.setOffline();
+	}
+
+	@Scheduled(cron = "${scheduler.cron.expression.lobby_checker}")
+	public void scheduledLobbyBonfication() {
+		scheduledBonification.removeFromLobby();
+	}
 }
