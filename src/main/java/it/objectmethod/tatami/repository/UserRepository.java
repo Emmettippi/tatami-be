@@ -34,4 +34,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 		+ "WHERE uu.relationship = :relationShip \n"
 		+ "  AND u.id = :userId")
 	List<User> findByUserId2AndRelation(@Param("userId") Long user2Id, @Param("relationShip") String relationShip);
+
+	@Query(nativeQuery = true, value = "SELECT u.* \n"
+		+ "FROM user_info u \n"
+		+ "WHERE u.user_status <> 'OFFLINE' \n"
+		+ "LIMIT :offset , :size")
+	List<User> findByStatusNotOffline(@Param("offset") Long offset, @Param("size") Long size);
 }

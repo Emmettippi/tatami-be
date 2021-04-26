@@ -13,6 +13,7 @@ import it.objectmethod.tatami.dto.UserUserDto;
 import it.objectmethod.tatami.entity.enums.UserRelation;
 import it.objectmethod.tatami.entity.enums.UserStatus;
 import it.objectmethod.tatami.service.LobbyService;
+import it.objectmethod.tatami.service.PercentageService;
 import it.objectmethod.tatami.service.UserService;
 import it.objectmethod.tatami.service.UserUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,8 @@ public class ScheduledBonification {
 	private UserUserService userUserService;
 	@Autowired
 	private LobbyService lobbyService;
+	@Autowired
+	private PercentageService percentageService;
 
 	public void userRelationBonification() {
 		long totalUsers = userService.count();
@@ -95,9 +98,11 @@ public class ScheduledBonification {
 		int offset = 0;
 		long nowInMillis = System.currentTimeMillis();
 		do {
-			List<UserDto> usersOfPage = userService.findPaged(page, size);
+			List<UserDto> usersOfPage = userService.findByStatusNotOffline(page, size);
 			for (UserDto user : usersOfPage) {
-				if (UserStatus.OFFLINE.equals(user.getUserStatus()) || user.getLastOnline() == null) {
+				if (user.getLastOnline() == null) {
+					user.setUserStatus(UserStatus.OFFLINE);
+					userService.update(user);
 					continue;
 				}
 				long lastOnlineInMillis = user.getLastOnline().getTime();
@@ -116,8 +121,8 @@ public class ScheduledBonification {
 	}
 
 	public void removeFromLobby() {
-		long totalUsers = lobbyService.count();
-		if (totalUsers == 0) {
+		long totalLobbies = lobbyService.count();
+		if (totalLobbies == 0) {
 			return;
 		}
 		int page = 0;
@@ -127,14 +132,14 @@ public class ScheduledBonification {
 		do {
 			List<LobbyDto> lobbiesOfPage = lobbyService.findPaged(page, size);
 			for (LobbyDto lobby : lobbiesOfPage) {
-				if (lobby.getLastInLobby4() != null && nowInMillis - lobby.getLastInLobby4().longValue() > 10000) {
-					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId1()), lobby.getId());
+				if (lobby.getLastInLobby4() != null && nowInMillis - lobby.getLastInLobby4().longValue() > 10000) { // 10 s
+					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId4()), lobby.getId());
 				}
 				if (lobby.getLastInLobby3() != null && nowInMillis - lobby.getLastInLobby3().longValue() > 10000) {
-					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId1()), lobby.getId());
+					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId3()), lobby.getId());
 				}
 				if (lobby.getLastInLobby2() != null && nowInMillis - lobby.getLastInLobby2().longValue() > 10000) {
-					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId1()), lobby.getId());
+					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId2()), lobby.getId());
 				}
 				if (lobby.getLastInLobby1() != null && nowInMillis - lobby.getLastInLobby1().longValue() > 10000) {
 					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId1()), lobby.getId());
@@ -145,6 +150,10 @@ public class ScheduledBonification {
 			}
 			page++;
 			offset = page * size;
-		} while (offset < totalUsers);
+		} while (offset < totalLobbies);
+	}
+
+	public void emptyPercentage() {
+		this.percentageService.emptyPercentage();
 	}
 }

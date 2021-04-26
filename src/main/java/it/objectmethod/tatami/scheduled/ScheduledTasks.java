@@ -21,6 +21,7 @@ public class ScheduledTasks {
 	@Scheduled(cron = "${scheduler.cron.expression.user_relation_bonification}")
 	public void scheduledUserRelationBonification() {
 		scheduledBonification.userRelationBonification();
+		scheduledBonification.emptyPercentage();
 	}
 
 	@Scheduled(cron = "${scheduler.cron.expression.user_offline}")
