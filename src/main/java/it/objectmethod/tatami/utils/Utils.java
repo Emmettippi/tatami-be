@@ -11,4 +11,19 @@ public class Utils {
 	public static Date now() {
 		return new Date();
 	}
+
+	@SafeVarargs
+	public static <E> E coalesce(E... items) {
+		if (items == null) {
+			return null;
+		}
+		E item = null;
+		for (E i : items) {
+			if (i != null) {
+				item = i;
+				break;
+			}
+		}
+		return item;
+	}
 }
