@@ -9,7 +9,7 @@ CREATE TABLE lobby (
 	, last_in_lobby_3 BIGINT NULL
 	, last_in_lobby_4 BIGINT NULL
 	, lobby_type VARCHAR(30) NOT NULL
-    , lobby_name VARCHAR(255) NULL
+	, lobby_name VARCHAR(255) NULL
 	, game_id BIGINT NULL
 	, CONSTRAINT PK_lobby PRIMARY KEY (id)
 );

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import it.objectmethod.tatami.controller.dto.LobbySearchQueryParams;
 import it.objectmethod.tatami.dto.LobbyDto;
 import it.objectmethod.tatami.dto.UserDto;
+import it.objectmethod.tatami.entity.enums.LobbyType;
 import it.objectmethod.tatami.service.LobbyService;
 
 @RestController
@@ -29,15 +30,15 @@ public class LobbyController {
 	}
 
 	@PostMapping("/set-visibility/{id}/{visibility}")
-	public void setLobbyVisibility(@Validated @RequestBody UserDto mySelf, @PathVariable("id") Long lobbyId,
+	public LobbyDto setLobbyVisibility(@Validated @RequestBody UserDto mySelf, @PathVariable("id") Long lobbyId,
 		@PathVariable("visibility") String visibility) {
-		return;
+		return this.lobbyService.updateLobbyType(mySelf, lobbyId, LobbyType.valueOf(visibility));
 	}
 
 	@PostMapping("/set-name/{id}/{lobbyName}")
-	public void setLobbyName(@Validated @RequestBody UserDto mySelf, @PathVariable("id") Long lobbyId,
+	public LobbyDto setLobbyName(@Validated @RequestBody UserDto mySelf, @PathVariable("id") Long lobbyId,
 		@PathVariable("lobbyName") String lobbyName) {
-		return;
+		return this.lobbyService.updateLobbyName(mySelf, lobbyId, lobbyName);
 	}
 
 	@PostMapping("/exit/{id}")
@@ -57,7 +58,7 @@ public class LobbyController {
 
 	@GetMapping("/search")
 	public List<LobbyDto> searchLobby(LobbySearchQueryParams lobbyParams) {
-		return null;
+		return this.lobbyService.searchPaged(lobbyParams);
 	}
 
 	@PostMapping("/start-game/{id}")

@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import it.objectmethod.tatami.controller.dto.LobbySearchQueryParams;
 import it.objectmethod.tatami.dto.LobbyDto;
 import it.objectmethod.tatami.dto.UserDto;
 import it.objectmethod.tatami.dto.mapper.LobbyMapper;
@@ -16,7 +17,9 @@ import it.objectmethod.tatami.entity.Lobby;
 import it.objectmethod.tatami.entity.Percentage;
 import it.objectmethod.tatami.entity.PercentageQueryParams;
 import it.objectmethod.tatami.entity.User;
+import it.objectmethod.tatami.entity.enums.LobbyType;
 import it.objectmethod.tatami.entity.enums.PercentageOperation;
+import it.objectmethod.tatami.repository.CustomRepository;
 import it.objectmethod.tatami.repository.LobbyRepository;
 import it.objectmethod.tatami.repository.UserRepository;
 import it.objectmethod.tatami.utils.Utils;
@@ -36,6 +39,8 @@ public class LobbyService {
 	private UserService userService;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private CustomRepository customRepository;
 
 	public boolean joinLobby(UserDto mySelf, Long lobbyId) {
 		if (!this.userService.checkMyself(mySelf) || lobbyId == null) {
@@ -155,5 +160,32 @@ public class LobbyService {
 			lobby.setLastInLobby4(Utils.now().getTime());
 		}
 		return lobbyMapper.toDto(lobbyRepository.save(lobby));
+	}
+
+	public LobbyDto updateLobbyName(UserDto mySelf, Long lobbyId, String name) {
+		if (!this.userService.checkMyself(mySelf)) {
+			return null;
+		}
+		Lobby lobby = lobbyRepository.getOne(lobbyId);
+		lobby.setLobbyName(name);
+		lobby.setLastInLobby1(Utils.now().getTime());
+		return lobbyMapper.toDto(lobbyRepository.save(lobby));
+	}
+
+	public LobbyDto updateLobbyType(UserDto mySelf, Long lobbyId, LobbyType lobbyType) {
+		if (!this.userService.checkMyself(mySelf)) {
+			return null;
+		}
+		Lobby lobby = lobbyRepository.getOne(lobbyId);
+		lobby.setLobbyType(lobbyType);
+		lobby.setLastInLobby1(Utils.now().getTime());
+		return lobbyMapper.toDto(lobbyRepository.save(lobby));
+	}
+
+	public List<LobbyDto> searchPaged(LobbySearchQueryParams params) {
+		if (params == null || params.getUserId() == null || params.getSize() == null || params.getPage() == null) {
+			return null;
+		}
+		return lobbyMapper.toDto(customRepository.searchLobbiesPaged(params));
 	}
 }

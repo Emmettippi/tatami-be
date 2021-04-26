@@ -1,18 +1,20 @@
 package it.objectmethod.tatami.entity;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 import it.objectmethod.tatami.entity.enums.LobbyType;
 import lombok.Data;
 
 @Data
-//@Entity
-//@Table(name = "lobby")
+@Entity
+@Table(name = "lobby")
 public class Lobby {
 
 	@Id
