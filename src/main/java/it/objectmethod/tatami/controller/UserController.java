@@ -40,7 +40,7 @@ public class UserController {
 		return userService.update(body);
 	}
 
-	@PutMapping("/{id}")
+	@GetMapping("/{id}")
 	public UserDto getOne(@PathVariable Long id, @RequestBody UserDto body) {
 		return userService.getOne(id, body);
 	}
