@@ -160,6 +160,11 @@ public class UserService {
 		return userMapper.toDto(users.getContent());
 	}
 
+	public List<UserDto> findByStatusNotOffline(int page, int size) {
+		return userMapper
+			.toDto(this.userRepository.findByStatusNotOffline(Long.valueOf(page * size), Long.valueOf(size)));
+	}
+
 	public UserDto updateLastOnline(UserDto mySelf) {
 		if (!this.checkMyself(mySelf)) {
 			return null;

@@ -223,4 +223,8 @@ public class PercentageService {
 		}
 		return this.save(perc);
 	}
+
+	public void emptyPercentage() {
+		this.percentageRepository.emptyPercentage();
+	}
 }
