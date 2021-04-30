@@ -30,13 +30,13 @@ public class UserController {
 	@PostMapping("/login")
 	public ResponseEntity<UserDto> login(@Validated @RequestBody LoginDto body) {
 		UserDto userLogged = userService.login(body);
-		return new ResponseEntity<>(userLogged, userLogged == null ? HttpStatus.BAD_REQUEST:  HttpStatus.OK);
+		return new ResponseEntity<>(userLogged, userLogged == null ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
 	}
 
 	@PostMapping("/create")
 	public ResponseEntity<UserDto> create(@Validated @RequestBody UserDto body) {
 		UserDto userCreated = userService.create(body);
-		return new ResponseEntity<>(userCreated, userCreated == null ? HttpStatus.BAD_REQUEST:  HttpStatus.OK);
+		return new ResponseEntity<>(userCreated, userCreated == null ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
 	}
 
 	@PutMapping("/update")

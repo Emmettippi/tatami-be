@@ -74,6 +74,7 @@ public class UserUserService {
 	public void removeFriendship(Long relationId, UserDto mySelf) {
 		this.removeFriendship(relationId, mySelf, false);
 	}
+
 	public void removeFriendship(Long relationId, UserDto mySelf, boolean avoidCheck) {
 		if (!this.userService.checkMyself(mySelf, avoidCheck)) {
 			return;

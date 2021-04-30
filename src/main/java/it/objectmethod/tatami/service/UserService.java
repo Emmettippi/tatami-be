@@ -46,7 +46,7 @@ public class UserService {
 
 	public UserDto create(UserDto dto) {
 		User existing = Utils.coalesce(userRepository.findByUsername(dto.getUsername()),
-				userRepository.findByEmail(dto.getEmail()));
+			userRepository.findByEmail(dto.getEmail()));
 		if (existing != null) {
 			return null;
 		}
@@ -96,7 +96,7 @@ public class UserService {
 		}
 
 		UserUser blockedRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(id, mySelf.getId(),
-				UserRelation.BLOCKED);
+			UserRelation.BLOCKED);
 		if (blockedRelation != null) {
 			return null;
 		}
@@ -204,7 +204,7 @@ public class UserService {
 
 	public List<UserDto> findByStatusNotOffline(int page, int size) {
 		return userMapper
-				.toDto(this.userRepository.findByStatusNotOffline(Long.valueOf(page * size), Long.valueOf(size)));
+			.toDto(this.userRepository.findByStatusNotOffline(Long.valueOf(page * size), Long.valueOf(size)));
 	}
 
 	public UserDto updateLastOnline(UserDto mySelf) {
