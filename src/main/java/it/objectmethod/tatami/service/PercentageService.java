@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import it.objectmethod.tatami.entity.Percentage;
 import it.objectmethod.tatami.entity.PercentageQueryParams;
@@ -224,6 +225,7 @@ public class PercentageService {
 		return this.save(perc);
 	}
 
+	@Transactional
 	public void emptyPercentage() {
 		this.percentageRepository.emptyPercentage();
 	}

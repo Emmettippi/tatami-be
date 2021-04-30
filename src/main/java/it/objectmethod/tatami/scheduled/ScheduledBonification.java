@@ -102,17 +102,17 @@ public class ScheduledBonification {
 			for (UserDto user : usersOfPage) {
 				if (user.getLastOnline() == null) {
 					user.setUserStatus(UserStatus.OFFLINE);
-					userService.update(user);
+					userService.update(user, true);
 					continue;
 				}
 				long lastOnlineInMillis = user.getLastOnline().getTime();
 				if (nowInMillis - lastOnlineInMillis > 300000) { // 5 min
 					user.setUserStatus(UserStatus.OFFLINE);
-					userService.update(user);
+					userService.update(user, true);
 				} else if (!UserStatus.NOT_RESPONDING.equals(user.getUserStatus())
 					&& nowInMillis - lastOnlineInMillis > 60000) { // 1 min
 					user.setUserStatus(UserStatus.NOT_RESPONDING);
-					userService.update(user);
+					userService.update(user, true);
 				}
 			}
 			page++;
