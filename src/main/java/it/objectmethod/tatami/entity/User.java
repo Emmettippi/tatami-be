@@ -46,7 +46,7 @@ public class User {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastOnline;
 
-	@Lob
-	@Column(name = "profile_image")
-	private byte[] profileImage;
+//	@Lob
+//	@Column(name = "profile_image")
+//	private byte[] profileImage;
 }

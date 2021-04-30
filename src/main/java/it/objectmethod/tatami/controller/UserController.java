@@ -3,6 +3,8 @@ package it.objectmethod.tatami.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,13 +28,15 @@ public class UserController {
 	private UserService userService;
 
 	@PostMapping("/login")
-	public UserDto login(@Validated @RequestBody LoginDto body) {
-		return userService.login(body);
+	public ResponseEntity<UserDto> login(@Validated @RequestBody LoginDto body) {
+		UserDto userLogged = userService.login(body);
+		return new ResponseEntity<>(userLogged, userLogged == null ? HttpStatus.BAD_REQUEST:  HttpStatus.OK);
 	}
 
 	@PostMapping("/create")
-	public UserDto create(@Validated @RequestBody UserDto body) {
-		return userService.create(body);
+	public ResponseEntity<UserDto> create(@Validated @RequestBody UserDto body) {
+		UserDto userCreated = userService.create(body);
+		return new ResponseEntity<>(userCreated, userCreated == null ? HttpStatus.BAD_REQUEST:  HttpStatus.OK);
 	}
 
 	@PutMapping("/update")

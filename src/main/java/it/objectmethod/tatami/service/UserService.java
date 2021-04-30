@@ -45,26 +45,35 @@ public class UserService {
 	}
 
 	public UserDto create(UserDto dto) {
-		User existing = userRepository.findByUsername(dto.getUsername());
+		User existing = Utils.coalesce(userRepository.findByUsername(dto.getUsername()),
+				userRepository.findByEmail(dto.getEmail()));
 		if (existing != null) {
 			return null;
 		}
 		String md5Pass = userRepository.md5Password(dto.getPassword());
 		User entity = userMapper.toEntity(dto);
+		entity.setUserStatus(UserStatus.OFFLINE);
+		entity.setLastOnline(Utils.now());
 		entity.setPassword(md5Pass);
 		return userMapper.toDto(userRepository.save(entity));
 	}
 
 	public UserDto update(UserDto dto) {
+		return this.update(dto, false);
+	}
+
+	public UserDto update(UserDto dto, boolean avoidCheck) {
 		User user = null;
-		if (this.checkMyself(dto)) {
+		if (this.checkMyself(dto, avoidCheck)) {
 			user = userMapper.toEntity(dto);
 			if (!Utils.isBlank(dto.getNewPassword())) {
 				String md5NewPass = userRepository.md5Password(dto.getNewPassword());
 				user.setPassword(md5NewPass);
 			}
-			user.setUserStatus(UserStatus.ONLINE);
-			user.setLastOnline(Utils.now());
+			if (!avoidCheck) {
+				user.setUserStatus(UserStatus.ONLINE);
+				user.setLastOnline(Utils.now());
+			}
 			user = userRepository.save(user);
 		}
 		return userMapper.toDto(user);
@@ -78,12 +87,16 @@ public class UserService {
 	}
 
 	public UserDto getOne(Long id, UserDto mySelf) {
-		if (id == null || !this.checkMyself(mySelf)) {
+		return this.getOne(id, mySelf, false);
+	}
+
+	public UserDto getOne(Long id, UserDto mySelf, boolean avoidCheck) {
+		if (id == null || !this.checkMyself(mySelf, avoidCheck)) {
 			return null;
 		}
 
-		UserUser blockedRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
-			id, mySelf.getId(), UserRelation.BLOCKED);
+		UserUser blockedRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(id, mySelf.getId(),
+				UserRelation.BLOCKED);
 		if (blockedRelation != null) {
 			return null;
 		}
@@ -96,7 +109,11 @@ public class UserService {
 	}
 
 	public void delete(UserDto dto) {
-		if (!this.checkMyself(dto)) {
+		this.delete(dto, false);
+	}
+
+	public void delete(UserDto dto, boolean avoidCheck) {
+		if (!this.checkMyself(dto, avoidCheck)) {
 			return;
 		}
 		User old = userRepository.getOne(dto.getId());
@@ -115,39 +132,64 @@ public class UserService {
 	}
 
 	public List<UserDto> getFriends(Long id, UserDto mySelf) {
-		if (!this.checkMyself(mySelf)) {
+		return this.getFriends(id, mySelf, false);
+	}
+
+	public List<UserDto> getFriends(Long id, UserDto mySelf, boolean avoidCheck) {
+		if (!this.checkMyself(mySelf, avoidCheck)) {
 			return null;
 		}
 		return userMapper.toDto(userRepository.findByUserIdAndRelation(id, UserRelation.FRIEND.name()));
 	}
 
 	public List<UserDto> getAskingFriends(Long id, UserDto mySelf) {
-		if (!this.checkMyself(mySelf)) {
+		return this.getAskingFriends(id, mySelf, false);
+	}
+
+	public List<UserDto> getAskingFriends(Long id, UserDto mySelf, boolean avoidCheck) {
+		if (!this.checkMyself(mySelf, avoidCheck)) {
 			return null;
 		}
 		return userMapper.toDto(userRepository.findByUserIdAndRelation(id, UserRelation.ASKING_FRIENDSHIP.name()));
 	}
 
 	public List<UserDto> getPendingFriendRequests(Long id, UserDto mySelf) {
-		if (!this.checkMyself(mySelf)) {
+		return this.getPendingFriendRequests(id, mySelf, false);
+	}
+
+	public List<UserDto> getPendingFriendRequests(Long id, UserDto mySelf, boolean avoidCheck) {
+		if (!this.checkMyself(mySelf, avoidCheck)) {
 			return null;
 		}
 		return userMapper.toDto(userRepository.findByUserIdAndRelation(id, UserRelation.PENDING_FRIENDSHIP.name()));
 	}
 
 	public List<UserDto> getBlocked(Long id, UserDto mySelf) {
-		if (!this.checkMyself(mySelf)) {
+		return this.getBlocked(id, mySelf, false);
+	}
+
+	public List<UserDto> getBlocked(Long id, UserDto mySelf, boolean avoidCheck) {
+		if (!this.checkMyself(mySelf, avoidCheck)) {
 			return null;
 		}
 		return userMapper.toDto(userRepository.findByUserIdAndRelation(id, UserRelation.BLOCKED.name()));
 	}
 
 	public boolean checkMyself(UserDto mySelf) {
+		return this.checkMyself(mySelf, false);
+	}
+
+	public boolean checkMyself(UserDto mySelf, boolean avoidCheck) {
 		if (mySelf == null || mySelf.getId() == null) {
 			return false;
 		}
+		if (avoidCheck) {
+			return true;
+		}
+		userRepository.flush();
 		User old = userRepository.getOne(mySelf.getId());
-		return old != null && old.getPassword().equals(mySelf.getPassword());
+		String oldPassword = old.getPassword();
+		return old != null && oldPassword.equals(mySelf.getPassword());
 	}
 
 	public long count() {
@@ -162,11 +204,15 @@ public class UserService {
 
 	public List<UserDto> findByStatusNotOffline(int page, int size) {
 		return userMapper
-			.toDto(this.userRepository.findByStatusNotOffline(Long.valueOf(page * size), Long.valueOf(size)));
+				.toDto(this.userRepository.findByStatusNotOffline(Long.valueOf(page * size), Long.valueOf(size)));
 	}
 
 	public UserDto updateLastOnline(UserDto mySelf) {
-		if (!this.checkMyself(mySelf)) {
+		return this.updateLastOnline(mySelf, false);
+	}
+
+	public UserDto updateLastOnline(UserDto mySelf, boolean avoidCheck) {
+		if (!this.checkMyself(mySelf, avoidCheck)) {
 			return null;
 		}
 		User user = userRepository.getOne(mySelf.getId());
