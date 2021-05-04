@@ -5,8 +5,10 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
+import it.objectmethod.tatami.dto.UserSearchResponseDto;
 import it.objectmethod.tatami.entity.Lobby;
 import it.objectmethod.tatami.entity.enums.LobbyType;
+import it.objectmethod.tatami.entity.enums.UserStatus;
 
 public class RowMappers {
 
@@ -30,6 +32,27 @@ public class RowMappers {
 					lobby.setLobbyType(LobbyType.valueOf(lobbyTypeStr));
 				}
 				return lobby;
+			}
+		};
+	}
+
+	public static RowMapper<UserSearchResponseDto> getUserSearchRowMapper() {
+		return new RowMapper<UserSearchResponseDto>() {
+			@Override
+			public UserSearchResponseDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+				UserSearchResponseDto usrDto = new UserSearchResponseDto();
+				usrDto.setCommonFriends(rs.getInt("common_friends"));
+				usrDto.setEmail(rs.getString("email"));
+				usrDto.setId(rs.getLong("id"));
+				usrDto.setLastOnline(rs.getDate("last_online"));
+				usrDto.setNickname(rs.getString("nickname"));
+				usrDto.setProfileImage(rs.getBytes("profile_image"));
+				usrDto.setUsername(rs.getString("username"));
+				String userStatusStr = rs.getString("user_status");
+				if (!Utils.isBlank(userStatusStr)) {
+					usrDto.setUserStatus(UserStatus.valueOf(userStatusStr));
+				}
+				return usrDto;
 			}
 		};
 	}

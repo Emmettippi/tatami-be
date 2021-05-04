@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.objectmethod.tatami.controller.dto.LoginDto;
+import it.objectmethod.tatami.controller.dto.UserSearchQueryParams;
 import it.objectmethod.tatami.dto.MyRelationsDto;
 import it.objectmethod.tatami.dto.UserDto;
+import it.objectmethod.tatami.dto.UserSearchResponseDto;
 import it.objectmethod.tatami.service.UserService;
 
 @RestController
@@ -44,7 +46,7 @@ public class UserController {
 		return userService.update(body);
 	}
 
-	@GetMapping("/{id}")
+	@PostMapping("/{id}")
 	public UserDto getOne(@PathVariable Long id, @RequestBody UserDto body) {
 		return userService.getOne(id, body);
 	}
@@ -54,9 +56,9 @@ public class UserController {
 		userService.delete(body);
 	}
 
-	@GetMapping("/search/{nickname}")
-	public List<UserDto> search(@PathVariable String nickname) {
-		return userService.search(nickname);
+	@GetMapping("/search")
+	public List<UserSearchResponseDto> search(@Validated UserSearchQueryParams params) {
+		return userService.search(params);
 	}
 
 	@PostMapping("/update-last-online")
@@ -64,7 +66,7 @@ public class UserController {
 		return userService.updateLastOnline(mySelf);
 	}
 
-	@GetMapping("/my-relations")
+	@PostMapping("/my-relations")
 	public MyRelationsDto search(@RequestBody UserDto mySelf) {
 		MyRelationsDto relations = new MyRelationsDto();
 		relations.setFriends(userService.getFriends(mySelf.getId(), mySelf));

@@ -1,6 +1,5 @@
 package it.objectmethod.tatami.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +9,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import it.objectmethod.tatami.controller.dto.LoginDto;
+import it.objectmethod.tatami.controller.dto.UserSearchQueryParams;
 import it.objectmethod.tatami.dto.UserDto;
+import it.objectmethod.tatami.dto.UserSearchResponseDto;
 import it.objectmethod.tatami.dto.mapper.UserMapper;
 import it.objectmethod.tatami.entity.User;
 import it.objectmethod.tatami.entity.UserUser;
 import it.objectmethod.tatami.entity.enums.UserRelation;
 import it.objectmethod.tatami.entity.enums.UserStatus;
+import it.objectmethod.tatami.repository.CustomRepository;
 import it.objectmethod.tatami.repository.UserRepository;
 import it.objectmethod.tatami.repository.UserUserRepository;
 import it.objectmethod.tatami.utils.Utils;
@@ -29,6 +31,8 @@ public class UserService {
 	private UserUserRepository userUserRepository;
 	@Autowired
 	private UserMapper userMapper;
+	@Autowired
+	private CustomRepository customRepository;
 
 	public UserDto login(LoginDto loginDto) {
 		if (loginDto == null || Utils.isBlank(loginDto.getPassword()) || Utils.isBlank(loginDto.getUsername())) {
@@ -46,7 +50,7 @@ public class UserService {
 
 	public UserDto create(UserDto dto) {
 		User existing = Utils.coalesce(userRepository.findByUsername(dto.getUsername()),
-			userRepository.findByEmail(dto.getEmail()));
+			userRepository.findByEmailIgnoreCase(dto.getEmail()));
 		if (existing != null) {
 			return null;
 		}
@@ -124,11 +128,8 @@ public class UserService {
 		return;
 	}
 
-	public List<UserDto> search(String nickname) {
-		if (Utils.isBlank(nickname)) {
-			return new ArrayList<>();
-		}
-		return userMapper.toDto(userRepository.findByNicknameContains(nickname));
+	public List<UserSearchResponseDto> search(UserSearchQueryParams params) {
+		return customRepository.searchForFriends(params);
 	}
 
 	public List<UserDto> getFriends(Long id, UserDto mySelf) {
