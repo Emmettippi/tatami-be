@@ -90,7 +90,6 @@ public class UserController {
 		ResponseEntity<UserDto> resp;
 		Long loggedUserId = jwtService.getUserIdByToken(authToken);
 		if (loggedUserId != null && loggedUserId.equals(id)) {
-			userService.delete(id);
 			resp = new ResponseEntity<>(userService.updateLastOnline(id), HttpStatus.OK);
 		} else {
 			resp = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -104,7 +103,6 @@ public class UserController {
 		ResponseEntity<MyRelationsDto> resp;
 		Long loggedUserId = jwtService.getUserIdByToken(authToken);
 		if (loggedUserId != null && loggedUserId.equals(id)) {
-			userService.delete(id);
 			MyRelationsDto relations = new MyRelationsDto();
 			relations.setFriends(userService.getFriends(id));
 			relations.setAskingFriends(userService.getAskingFriends(id));
