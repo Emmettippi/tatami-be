@@ -33,7 +33,7 @@ public class AuthenticationFilter implements Filter {
 		String url = httpReq.getRequestURI();
 		// System.out.println(url);
 
-		if (url.endsWith("login")) {
+		if (url.endsWith("login") || url.endsWith("user/create")) {
 			// System.out.println("RICHIESTA APPROVATA!");
 			chain.doFilter(request, response);
 		} else {
