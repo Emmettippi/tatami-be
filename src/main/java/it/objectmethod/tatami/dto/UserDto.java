@@ -19,6 +19,7 @@ public class UserDto {
 	private String nickname;
 	@NotNull
 	private String email;
+	private String token;
 	private UserStatus userStatus;
 	private Date lastOnline;
 	private byte[] profileImage;

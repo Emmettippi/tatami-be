@@ -12,6 +12,8 @@ public abstract class UserMapper {
 
 	public abstract UserDto toDto(User user);
 
+	public abstract UserDto toDto(User user, String token);
+
 	public abstract List<UserDto> toDto(List<User> user);
 
 	public abstract User toEntity(UserDto dto);

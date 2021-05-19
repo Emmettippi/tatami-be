@@ -4,6 +4,8 @@ import java.util.Date;
 
 public class Utils {
 
+	public static final String TATAMI_AUTH_TOKEN = "tatami-auth-token";
+
 	public static boolean isBlank(String str) {
 		return str == null || str.trim().isEmpty();
 	}

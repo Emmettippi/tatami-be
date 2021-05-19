@@ -26,6 +26,8 @@ import it.objectmethod.tatami.utils.Utils;
 public class UserService {
 
 	@Autowired
+	private JWTService jwtService;
+	@Autowired
 	private UserRepository userRepository;
 	@Autowired
 	private UserUserRepository userUserRepository;
@@ -40,12 +42,15 @@ public class UserService {
 		}
 		String md5Pass = userRepository.md5Password(loginDto.getPassword());
 		User user = userRepository.findByUsernameAndPassword(loginDto.getUsername(), md5Pass);
+		String token = null;
 		if (user != null) {
 			user.setUserStatus(UserStatus.ONLINE);
 			user.setLastOnline(Utils.now());
 			user = userRepository.save(user);
+
+			token = jwtService.createJWTToken(user);
 		}
-		return userMapper.toDto(user);
+		return userMapper.toDto(user, token);
 	}
 
 	public UserDto create(UserDto dto) {
