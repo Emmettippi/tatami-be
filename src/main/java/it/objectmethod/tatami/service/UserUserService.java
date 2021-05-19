@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.objectmethod.tatami.dto.UserDto;
 import it.objectmethod.tatami.dto.UserUserDto;
 import it.objectmethod.tatami.dto.mapper.UserMapper;
 import it.objectmethod.tatami.dto.mapper.UserUserMapper;
@@ -35,12 +34,9 @@ public class UserUserService {
 	@Autowired
 	private UserService userService;
 
-	public boolean askFriendship(Long askingUserId, UserDto mySelf) {
-		if (!this.userService.checkMyself(mySelf)) {
-			return false;
-		}
+	public boolean askFriendship(Long askingUserId, Long loggedUserId) {
 		boolean blocked = false;
-		List<User> blockers = userRepository.findByUserId2AndRelation(mySelf.getId(), UserRelation.BLOCKED.name());
+		List<User> blockers = userRepository.findByUserId2AndRelation(loggedUserId, UserRelation.BLOCKED.name());
 		for (User u : blockers) {
 			if (u.getId().equals(askingUserId)) {
 				blocked = true;
@@ -52,61 +48,64 @@ public class UserUserService {
 		}
 
 		PercentageQueryParams params = new PercentageQueryParams();
-		params.setIntegerParam1(mySelf.getId());
+		params.setIntegerParam1(loggedUserId);
 		params.setIntegerParam2(askingUserId);
-		percentageService.prepareQueryParams(userMapper.toEntity(mySelf), params, PercentageOperation.ASK_FRIENDSHIP);
+		percentageService.prepareQueryParams(userRepository.getOne(loggedUserId), params,
+			PercentageOperation.ASK_FRIENDSHIP);
 		return true;
 	}
 
-	public void acceptFriendship(Long id, UserDto mySelf) {
-		if (!this.userService.checkMyself(mySelf)) {
-			return;
+	public boolean acceptFriendship(Long relationId, Long loggedUserId) {
+		UserUser pendingRelation = userUserRepository.getOne(relationId);
+		if (pendingRelation == null || loggedUserId == null || (!loggedUserId.equals(pendingRelation.getUser1().getId())
+			&& !loggedUserId.equals(pendingRelation.getUser2().getId()))) {
+			return false;
 		}
-		UserUser pendingRelation = userUserRepository.getOne(id);
 		UserUser askingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
 			pendingRelation.getUser2().getId(), pendingRelation.getUser1().getId(), UserRelation.ASKING_FRIENDSHIP);
 		pendingRelation.setRelationship(UserRelation.FRIEND);
 		askingRelation.setRelationship(UserRelation.FRIEND);
 		userUserRepository.save(pendingRelation);
 		userUserRepository.save(askingRelation);
+		return true;
 	}
 
-	public void removeFriendship(Long relationId, UserDto mySelf) {
-		this.removeFriendship(relationId, mySelf, false);
-	}
-
-	public void removeFriendship(Long relationId, UserDto mySelf, boolean avoidCheck) {
-		if (!this.userService.checkMyself(mySelf, avoidCheck)) {
-			return;
-		}
+	public boolean removeFriendship(Long relationId, Long loggedUserId) {
 		UserUser relation = userUserRepository.getOne(relationId);
+		if (relation == null || loggedUserId == null || (!loggedUserId.equals(relation.getUser1().getId())
+			&& !loggedUserId.equals(relation.getUser2().getId()))) {
+			return false;
+		}
 		UserUser friendRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
-			relation.getUser2().getId(), relation.getUser1().getId(), relation.getRelationship());
+			relation.getUser2().getId(), relation.getUser1().getId(), UserRelation.FRIEND);
 		this.delete(relation.getId());
 		this.delete(friendRelation.getId());
+		return true;
 	}
 
-	public void blockUser(Long userId, UserDto mySelf) {
-		if (!this.userService.checkMyself(mySelf)) {
-			return;
-		}
-		UserUser friendRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(mySelf.getId(), userId,
+	public boolean blockUser(Long userId, Long loggedUserId) {
+		UserUser friendRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(loggedUserId, userId,
 			UserRelation.FRIEND);
 		if (friendRelation != null) {
-			this.removeFriendship(friendRelation.getId(), mySelf);
+			this.removeFriendship(friendRelation.getId(), loggedUserId);
 		}
 		UserUser blockRelation = new UserUser();
 		blockRelation.setRelationship(UserRelation.BLOCKED);
-		blockRelation.setUser1(userRepository.getOne(mySelf.getId()));
+		blockRelation.setUser1(userRepository.getOne(loggedUserId));
 		blockRelation.setUser2(userRepository.getOne(userId));
 		userUserRepository.save(blockRelation);
+		return true;
 	}
 
-	public void unlockUser(Long relationId, UserDto mySelf) {
-		if (!this.userService.checkMyself(mySelf)) {
-			return;
+	public boolean unlockUser(Long relationId, Long loggedUserId) {
+		UserUser relation = userUserRepository.getOne(relationId);
+		if (relation == null || loggedUserId == null || (!loggedUserId.equals(relation.getUser1().getId())
+			&& !loggedUserId.equals(relation.getUser2().getId()))) {
+			return false;
 		}
+
 		this.delete(relationId);
+		return true;
 	}
 
 	public Percentage handleFriendship(Percentage perc) {

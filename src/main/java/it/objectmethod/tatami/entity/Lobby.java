@@ -62,4 +62,12 @@ public class Lobby {
 	public boolean isEmpty() {
 		return this.userId1 == null && this.userId2 == null && this.userId3 == null && this.userId4 == null;
 	}
+
+	public boolean isUserAlreadyInside(Long userId) {
+		if (userId == null) {
+			return true;
+		}
+		return !userId.equals(this.userId1) && !userId.equals(this.userId2) && !userId.equals(this.userId3)
+			&& !userId.equals(this.userId4);
+	}
 }

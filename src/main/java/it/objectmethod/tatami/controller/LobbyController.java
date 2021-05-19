@@ -3,52 +3,87 @@ package it.objectmethod.tatami.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import it.objectmethod.tatami.controller.dto.LobbySearchQueryParams;
 import it.objectmethod.tatami.dto.LobbyDto;
-import it.objectmethod.tatami.dto.UserDto;
 import it.objectmethod.tatami.entity.enums.LobbyType;
+import it.objectmethod.tatami.service.JWTService;
 import it.objectmethod.tatami.service.LobbyService;
+import it.objectmethod.tatami.utils.Utils;
 
 @RestController
 @RequestMapping("/api/lobby")
 public class LobbyController {
 
 	@Autowired
+	private JWTService jwtService;
+	@Autowired
 	private LobbyService lobbyService;
 
 	@PostMapping("/join/{id}")
-	public boolean joinLobby(@Validated @RequestBody UserDto mySelf, @PathVariable("id") Long lobbyId) {
-		return lobbyService.joinLobby(mySelf, lobbyId);
+	public boolean joinLobby(@PathVariable("id") Long lobbyId,
+		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
+		Long loggedUserId = jwtService.getUserIdByToken(authToken);
+		return lobbyService.joinLobby(lobbyId, loggedUserId);
 	}
 
 	@PostMapping("/set-visibility/{id}/{visibility}")
-	public LobbyDto setLobbyVisibility(@Validated @RequestBody UserDto mySelf, @PathVariable("id") Long lobbyId,
-		@PathVariable("visibility") String visibility) {
-		return this.lobbyService.updateLobbyType(mySelf, lobbyId, LobbyType.valueOf(visibility));
+	public ResponseEntity<LobbyDto> setLobbyVisibility(@PathVariable("id") Long lobbyId,
+		@PathVariable("visibility") String visibility, @RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
+		ResponseEntity<LobbyDto> resp;
+		Long loggedUserId = jwtService.getUserIdByToken(authToken);
+		LobbyDto dto = this.lobbyService.updateLobbyType(lobbyId, loggedUserId, LobbyType.valueOf(visibility));
+		if (dto == null) {
+			resp = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} else {
+			resp = new ResponseEntity<>(dto, HttpStatus.OK);
+		}
+		return resp;
 	}
 
 	@PostMapping("/set-name/{id}/{lobbyName}")
-	public LobbyDto setLobbyName(@Validated @RequestBody UserDto mySelf, @PathVariable("id") Long lobbyId,
-		@PathVariable("lobbyName") String lobbyName) {
-		return this.lobbyService.updateLobbyName(mySelf, lobbyId, lobbyName);
+	public ResponseEntity<LobbyDto> setLobbyName(@PathVariable("id") Long lobbyId,
+		@PathVariable("lobbyName") String lobbyName,
+		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
+		ResponseEntity<LobbyDto> resp;
+		Long loggedUserId = jwtService.getUserIdByToken(authToken);
+		LobbyDto dto = this.lobbyService.updateLobbyName(lobbyId, loggedUserId, lobbyName);
+		if (dto == null) {
+			resp = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} else {
+			resp = new ResponseEntity<>(dto, HttpStatus.OK);
+		}
+		return resp;
 	}
 
 	@PostMapping("/exit/{id}")
-	public void exitLobby(@Validated @RequestBody UserDto mySelf, @PathVariable("id") Long lobbyId) {
-		this.lobbyService.exitLobby(mySelf, lobbyId);
+	public ResponseEntity<?> exitLobby(@PathVariable("id") Long lobbyId,
+		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
+		Long loggedUserId = jwtService.getUserIdByToken(authToken);
+		this.lobbyService.exitLobby(lobbyId, loggedUserId);
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@PostMapping("/update-last-online/{id}")
-	public LobbyDto updateLastOnline(@Validated @RequestBody UserDto mySelf, @PathVariable("id") Long lobbyId) {
-		return this.lobbyService.updateLastOnline(mySelf, lobbyId);
+	public ResponseEntity<LobbyDto> updateLastOnline(@PathVariable("id") Long lobbyId,
+		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
+		ResponseEntity<LobbyDto> resp;
+		Long loggedUserId = jwtService.getUserIdByToken(authToken);
+		LobbyDto dto = this.lobbyService.updateLastOnline(lobbyId, loggedUserId);
+		if (dto == null) {
+			resp = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} else {
+			resp = new ResponseEntity<>(dto, HttpStatus.OK);
+		}
+		return resp;
 	}
 
 	@GetMapping("/{id}")
@@ -62,7 +97,7 @@ public class LobbyController {
 	}
 
 	@PostMapping("/start-game/{id}")
-	public void startGame(@Validated @RequestBody UserDto mySelf) {
+	public void startGame(@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
 
 	}
 }

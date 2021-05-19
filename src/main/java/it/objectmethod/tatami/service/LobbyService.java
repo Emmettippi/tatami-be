@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 
 import it.objectmethod.tatami.controller.dto.LobbySearchQueryParams;
 import it.objectmethod.tatami.dto.LobbyDto;
-import it.objectmethod.tatami.dto.UserDto;
 import it.objectmethod.tatami.dto.mapper.LobbyMapper;
-import it.objectmethod.tatami.dto.mapper.UserMapper;
 import it.objectmethod.tatami.entity.Lobby;
 import it.objectmethod.tatami.entity.Percentage;
 import it.objectmethod.tatami.entity.PercentageQueryParams;
@@ -34,22 +32,16 @@ public class LobbyService {
 	@Autowired
 	private PercentageService percentageService;
 	@Autowired
-	private UserMapper userMapper;
-	@Autowired
-	private UserService userService;
-	@Autowired
 	private UserRepository userRepository;
 	@Autowired
 	private CustomRepository customRepository;
 
-	public boolean joinLobby(UserDto mySelf, Long lobbyId) {
-		if (!this.userService.checkMyself(mySelf) || lobbyId == null) {
-			return false;
-		}
+	public boolean joinLobby(Long lobbyId, Long loggedUserId) {
 		PercentageQueryParams params = new PercentageQueryParams();
-		params.setIntegerParam1(mySelf.getId());
+		params.setIntegerParam1(loggedUserId);
 		params.setIntegerParam2(lobbyId);
-		percentageService.prepareQueryParams(userMapper.toEntity(mySelf), params, PercentageOperation.JOIN_LOBBY);
+		percentageService.prepareQueryParams(userRepository.getOne(loggedUserId), params,
+			PercentageOperation.JOIN_LOBBY);
 		return true;
 	}
 
@@ -57,7 +49,7 @@ public class LobbyService {
 		PercentageQueryParams params = perc.getPercentageQueryParams().get(0);
 		Lobby lobby = lobbyRepository.getOne(params.getIntegerParam2());
 		User user = userRepository.getOne(params.getIntegerParam1());
-		if (!lobby.isFull()) {
+		if (!lobby.isFull() && !lobby.isUserAlreadyInside(user.getId())) {
 			if (lobby.getUserId1() == null) {
 				lobby.setUserId1(user.getId());
 				lobby.setLastInLobby1(Utils.now().getTime());
@@ -81,15 +73,12 @@ public class LobbyService {
 		return percentageService.save(perc, false);
 	}
 
-	public LobbyDto exitLobby(UserDto mySelf, Long lobbyId) {
-		if (!this.userService.checkMyself(mySelf) || lobbyId == null) {
-			return null;
-		}
+	public LobbyDto exitLobby(Long lobbyId, Long loggedUserId) {
 		Lobby lobby = lobbyRepository.getOne(lobbyId);
-		if (lobby == null) {
+		if (lobby == null || loggedUserId == null) {
 			return null;
 		}
-		if (mySelf.getId().equals(lobby.getUserId1())) {
+		if (loggedUserId.equals(lobby.getUserId1())) {
 			lobby.setLastInLobby1(lobby.getLastInLobby2());
 			lobby.setLastInLobby2(lobby.getLastInLobby3());
 			lobby.setLastInLobby3(lobby.getLastInLobby4());
@@ -99,7 +88,7 @@ public class LobbyService {
 			lobby.setUserId3(lobby.getUserId4());
 			lobby.setUserId4(null);
 			lobby = lobbyRepository.save(lobby);
-		} else if (mySelf.getId().equals(lobby.getUserId2())) {
+		} else if (loggedUserId.equals(lobby.getUserId2())) {
 			lobby.setLastInLobby2(lobby.getLastInLobby3());
 			lobby.setLastInLobby3(lobby.getLastInLobby4());
 			lobby.setLastInLobby4(null);
@@ -107,13 +96,13 @@ public class LobbyService {
 			lobby.setUserId3(lobby.getUserId4());
 			lobby.setUserId4(null);
 			lobby = lobbyRepository.save(lobby);
-		} else if (mySelf.getId().equals(lobby.getUserId3())) {
+		} else if (loggedUserId.equals(lobby.getUserId3())) {
 			lobby.setLastInLobby3(lobby.getLastInLobby4());
 			lobby.setLastInLobby4(null);
 			lobby.setUserId3(lobby.getUserId4());
 			lobby.setUserId4(null);
 			lobby = lobbyRepository.save(lobby);
-		} else if (mySelf.getId().equals(lobby.getUserId4())) {
+		} else if (loggedUserId.equals(lobby.getUserId4())) {
 			lobby.setLastInLobby4(null);
 			lobby.setUserId4(null);
 			lobby = lobbyRepository.save(lobby);
@@ -145,38 +134,44 @@ public class LobbyService {
 		this.lobbyRepository.deleteById(id);
 	}
 
-	public LobbyDto updateLastOnline(UserDto mySelf, Long lobbyId) {
-		if (!this.userService.checkMyself(mySelf)) {
+	public LobbyDto updateLastOnline(Long lobbyId, Long loggedUserId) {
+		if (loggedUserId == null || lobbyId == null) {
 			return null;
 		}
 		Lobby lobby = lobbyRepository.getOne(lobbyId);
-		if (mySelf.getId().equals(lobby.getUserId1())) {
+		if (loggedUserId.equals(lobby.getUserId1())) {
 			lobby.setLastInLobby1(Utils.now().getTime());
-		} else if (mySelf.getId().equals(lobby.getUserId2())) {
+		} else if (loggedUserId.equals(lobby.getUserId2())) {
 			lobby.setLastInLobby2(Utils.now().getTime());
-		} else if (mySelf.getId().equals(lobby.getUserId3())) {
+		} else if (loggedUserId.equals(lobby.getUserId3())) {
 			lobby.setLastInLobby3(Utils.now().getTime());
-		} else if (mySelf.getId().equals(lobby.getUserId4())) {
+		} else if (loggedUserId.equals(lobby.getUserId4())) {
 			lobby.setLastInLobby4(Utils.now().getTime());
 		}
 		return lobbyMapper.toDto(lobbyRepository.save(lobby));
 	}
 
-	public LobbyDto updateLobbyName(UserDto mySelf, Long lobbyId, String name) {
-		if (!this.userService.checkMyself(mySelf)) {
+	public LobbyDto updateLobbyName(Long lobbyId, Long loggedUserId, String name) {
+		if (lobbyId == null || loggedUserId == null) {
 			return null;
 		}
 		Lobby lobby = lobbyRepository.getOne(lobbyId);
+		if (!loggedUserId.equals(lobby.getUserId1())) {
+			return null;
+		}
 		lobby.setLobbyName(name);
 		lobby.setLastInLobby1(Utils.now().getTime());
 		return lobbyMapper.toDto(lobbyRepository.save(lobby));
 	}
 
-	public LobbyDto updateLobbyType(UserDto mySelf, Long lobbyId, LobbyType lobbyType) {
-		if (!this.userService.checkMyself(mySelf)) {
+	public LobbyDto updateLobbyType(Long lobbyId, Long loggedUserId, LobbyType lobbyType) {
+		if (lobbyId == null || loggedUserId == null) {
 			return null;
 		}
 		Lobby lobby = lobbyRepository.getOne(lobbyId);
+		if (!loggedUserId.equals(lobby.getUserId1())) {
+			return null;
+		}
 		lobby.setLobbyType(lobbyType);
 		lobby.setLastInLobby1(Utils.now().getTime());
 		return lobbyMapper.toDto(lobbyRepository.save(lobby));
