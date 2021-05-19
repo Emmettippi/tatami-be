@@ -50,12 +50,16 @@ public class ScheduledPercentage {
 
 	private void caseAskFiendship(Percentage p, int i, int size) {
 		p = userUserService.handleFriendship(p);
-		log.info("Process {} at {}% in status {}", p.getId(), 100 * p.getProgression(),
-			p.getProgressionStatus().name());
-		log.info("!!! --- End PercentageWorkerTask {} of {} with id: {} --- !!!", i + 1, size, p.getId());
+		this.logStatus(p, i, size);
 	}
 
 	private void caseJoinLobby(Percentage p) {
 		p = lobbyService.handleJoinLobby(p);
+	}
+
+	private void logStatus(Percentage p, int i, int size) {
+		log.info("Process {} at {}% in status {}", p.getId(), 100 * p.getProgression(),
+			p.getProgressionStatus().name());
+		log.info("!!! --- End PercentageWorkerTask {} of {} with id: {} --- !!!", i + 1, size, p.getId());
 	}
 }

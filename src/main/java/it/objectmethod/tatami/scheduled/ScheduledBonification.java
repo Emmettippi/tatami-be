@@ -109,10 +109,13 @@ public class ScheduledBonification {
 				if (nowInMillis - lastOnlineInMillis > 300000) { // 5 min
 					user.setUserStatus(UserStatus.OFFLINE);
 					userService.update(user, true);
+					log.info("!!! --- User " + user.getId() + " set to OFFLINE due to inactivity over 5min --- !!!");
 				} else if (!UserStatus.NOT_RESPONDING.equals(user.getUserStatus())
 					&& nowInMillis - lastOnlineInMillis > 60000) { // 1 min
 					user.setUserStatus(UserStatus.NOT_RESPONDING);
 					userService.update(user, true);
+					log.info(
+						"!!! --- User " + user.getId() + " set to NOT_RESPONDING due to inactivity over 1min --- !!!");
 				}
 			}
 			page++;
@@ -134,18 +137,27 @@ public class ScheduledBonification {
 			for (LobbyDto lobby : lobbiesOfPage) {
 				if (lobby.getLastInLobby4() != null && nowInMillis - lobby.getLastInLobby4().longValue() > 10000) { // 10 s
 					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId4()), lobby.getId());
+					log.info("!!! --- User " + lobby.getUserId4() + " removed from lobby " + lobby.getId()
+						+ " due to inactivity over 10s --- !!!");
 				}
 				if (lobby.getLastInLobby3() != null && nowInMillis - lobby.getLastInLobby3().longValue() > 10000) {
 					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId3()), lobby.getId());
+					log.info("!!! --- User " + lobby.getUserId3() + " removed from lobby " + lobby.getId()
+						+ " due to inactivity over 10s --- !!!");
 				}
 				if (lobby.getLastInLobby2() != null && nowInMillis - lobby.getLastInLobby2().longValue() > 10000) {
 					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId2()), lobby.getId());
+					log.info("!!! --- User " + lobby.getUserId2() + " removed from lobby " + lobby.getId()
+						+ " due to inactivity over 10s --- !!!");
 				}
 				if (lobby.getLastInLobby1() != null && nowInMillis - lobby.getLastInLobby1().longValue() > 10000) {
 					lobby = this.lobbyService.exitLobby(userService.forceGetOne(lobby.getUserId1()), lobby.getId());
+					log.info("!!! --- User " + lobby.getUserId1() + " removed from lobby " + lobby.getId()
+						+ " due to inactivity over 10s --- !!!");
 				}
 				if (lobby.isEmpty()) {
 					this.lobbyService.delete(lobby.getId());
+					log.info("!!! --- Lobby " + lobby.getId() + "deleted because empty --- !!!");
 				}
 			}
 			page++;
