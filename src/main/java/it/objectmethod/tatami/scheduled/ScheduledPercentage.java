@@ -28,19 +28,23 @@ public class ScheduledPercentage {
 
 	public void doPercentage() {
 		List<Percentage> percs = percentageService.checkPreparedTaskToRun(PercentageOperation.all());
-		for (int i = 0; i < percs.size(); i++) {
+		int size = percs.size();
+		for (int i = 0; i < size; i++) {
 			if (i == 0) {
 				log.info("Cron Percentage: Current Time - {}", FORMATTER.format(LocalDateTime.now()));
 			}
 			Percentage p = percs.get(i);
-			log.info("!!! --- Init PercentageWorkerTask {} of {} with id: {} || TYPE: {} --- !!!", i + 1, percs.size(),
+			log.info("!!! --- Init PercentageWorkerTask {} of {} with id: {} || TYPE: {} --- !!!", i + 1, size,
 				p.getId(), p.getOperation().name());
 			switch (p.getOperation()) {
 			case ASK_FRIENDSHIP:
-				this.caseAskFiendship(p, i, percs.size());
+				this.caseAskFiendship(p, i, size);
 				break;
 			case JOIN_LOBBY:
 				this.caseJoinLobby(p);
+				break;
+			case START_GAME:
+				this.caseStartGame(p, i, size);
 				break;
 			default:
 				break;
@@ -54,7 +58,12 @@ public class ScheduledPercentage {
 	}
 
 	private void caseJoinLobby(Percentage p) {
+		// TODO startGame
 		p = lobbyService.handleJoinLobby(p);
+	}
+
+	private void caseStartGame(Percentage p, int i, int size) {
+		this.logStatus(p, i, size);
 	}
 
 	private void logStatus(Percentage p, int i, int size) {

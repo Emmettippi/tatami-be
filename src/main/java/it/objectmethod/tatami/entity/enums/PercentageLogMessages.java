@@ -1,8 +1,7 @@
 package it.objectmethod.tatami.entity.enums;
 
 public enum PercentageLogMessages {
-	ARXIVAR_RESOURCE_NOT_DOWNLOADED(LogLevel.ERROR), NO_RESOURCE_FOR_TRANSCRIPT(LogLevel.ERROR), EXPORT_FAILED(
-		LogLevel.FATAL), EXPORT_HAS_ZERO_RECORDS(LogLevel.INFO);
+	LOBBY_IS_CLOSED(LogLevel.WARNING), NONEXISTEND_LOBBY(LogLevel.WARNING);
 
 	private LogLevel logLevel;
 

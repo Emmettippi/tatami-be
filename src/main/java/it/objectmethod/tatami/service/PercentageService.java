@@ -213,15 +213,7 @@ public class PercentageService {
 		List<PercentageQueryParams> queryParamsLs = new ArrayList<>();
 		queryParamsLs.add(params);
 		perc.setPercentageQueryParams(queryParamsLs);
-
-		switch (operation) {
-		case JOIN_LOBBY:
-		case ASK_FRIENDSHIP:
-			perc.setLocked(Boolean.FALSE);
-			break;
-		default:
-			break;
-		}
+		perc.setLocked(operation.forLock());
 		return this.save(perc);
 	}
 
