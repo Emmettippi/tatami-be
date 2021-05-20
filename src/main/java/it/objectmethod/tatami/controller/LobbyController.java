@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import it.objectmethod.tatami.controller.dto.LobbyQueryParams;
 import it.objectmethod.tatami.controller.dto.LobbySearchQueryParams;
 import it.objectmethod.tatami.dto.LobbyDto;
 import it.objectmethod.tatami.entity.enums.LobbyType;
@@ -28,11 +29,29 @@ public class LobbyController {
 	@Autowired
 	private LobbyService lobbyService;
 
+	@PostMapping("/create")
+	public ResponseEntity<LobbyDto> createLobby(@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken,
+		LobbyQueryParams lobbyParams) {
+		ResponseEntity<LobbyDto> resp;
+		Long loggedUserId = jwtService.getUserIdByToken(authToken);
+		if (lobbyParams == null) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		LobbyDto dto = this.lobbyService.createLobby(loggedUserId, lobbyParams.getName(), lobbyParams.getLobbyType());
+		if (dto == null) {
+			resp = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} else {
+			resp = new ResponseEntity<>(dto, HttpStatus.OK);
+		}
+		return resp;
+	}
+
 	@PostMapping("/join/{id}")
-	public boolean joinLobby(@PathVariable("id") Long lobbyId,
+	public ResponseEntity<Boolean> joinLobby(@PathVariable("id") Long lobbyId,
 		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
 		Long loggedUserId = jwtService.getUserIdByToken(authToken);
-		return lobbyService.joinLobby(lobbyId, loggedUserId);
+		Boolean resp = lobbyService.joinLobby(lobbyId, loggedUserId);
+		return new ResponseEntity<>(resp, resp ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
 	}
 
 	@PostMapping("/set-visibility/{id}/{visibility}")
@@ -97,7 +116,16 @@ public class LobbyController {
 	}
 
 	@PostMapping("/start-game/{id}")
-	public void startGame(@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
-
+	public ResponseEntity<LobbyDto> startGame(@PathVariable("id") Long lobbyId,
+		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
+		ResponseEntity<LobbyDto> resp;
+		Long loggedUserId = jwtService.getUserIdByToken(authToken);
+		LobbyDto dto = this.lobbyService.startGame(lobbyId, loggedUserId);
+		if (dto == null) {
+			resp = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} else {
+			resp = new ResponseEntity<>(dto, HttpStatus.OK);
+		}
+		return resp;
 	}
 }

@@ -3,7 +3,6 @@ package it.objectmethod.tatami.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -13,10 +12,13 @@ import it.objectmethod.tatami.dto.LobbyDto;
 import it.objectmethod.tatami.dto.mapper.LobbyMapper;
 import it.objectmethod.tatami.entity.Lobby;
 import it.objectmethod.tatami.entity.Percentage;
+import it.objectmethod.tatami.entity.PercentageError;
 import it.objectmethod.tatami.entity.PercentageQueryParams;
 import it.objectmethod.tatami.entity.User;
 import it.objectmethod.tatami.entity.enums.LobbyType;
+import it.objectmethod.tatami.entity.enums.PercentageLogMessages;
 import it.objectmethod.tatami.entity.enums.PercentageOperation;
+import it.objectmethod.tatami.entity.enums.PlayerColor;
 import it.objectmethod.tatami.repository.CustomRepository;
 import it.objectmethod.tatami.repository.LobbyRepository;
 import it.objectmethod.tatami.repository.UserRepository;
@@ -32,11 +34,37 @@ public class LobbyService {
 	@Autowired
 	private PercentageService percentageService;
 	@Autowired
+	private PercentageErrorsService percentageErrorsService;
+	@Autowired
 	private UserRepository userRepository;
 	@Autowired
 	private CustomRepository customRepository;
 
+	public LobbyDto createLobby(Long loggedUserId, String lobbyName, String lobbyType) {
+		if (loggedUserId == null) {
+			return null;
+		}
+		Lobby newLobby = new Lobby();
+		newLobby.setUserId1(loggedUserId);
+		newLobby.setLastInLobby1(Long.valueOf(Utils.now().getTime()));
+		newLobby.setColor1(PlayerColor.chooseRandomExcept());
+		newLobby.setClosed(Boolean.FALSE);
+		if (!Utils.isBlank(lobbyType)) {
+			newLobby.setLobbyType(LobbyType.valueOf(lobbyType));
+		}
+		newLobby = lobbyRepository.save(newLobby);
+		return lobbyMapper.toDto(newLobby);
+	}
+
 	public boolean joinLobby(Long lobbyId, Long loggedUserId) {
+		if (lobbyId == null || loggedUserId == null) {
+			return false;
+		}
+		Lobby lobby = lobbyRepository.getOne(lobbyId);
+		if (lobby == null || Boolean.TRUE.equals(lobby.getClosed())) {
+			return false;
+		}
+
 		PercentageQueryParams params = new PercentageQueryParams();
 		params.setIntegerParam1(loggedUserId);
 		params.setIntegerParam2(lobbyId);
@@ -48,23 +76,50 @@ public class LobbyService {
 	public Percentage handleJoinLobby(Percentage perc) {
 		PercentageQueryParams params = perc.getPercentageQueryParams().get(0);
 		Lobby lobby = lobbyRepository.getOne(params.getIntegerParam2());
+		if (lobby == null) {
+			PercentageError error = new PercentageError();
+			error.setMessageKey(PercentageLogMessages.NONEXISTEND_LOBBY);
+			error.setExtraParam1(String.valueOf(params.getIntegerParam2()));
+			error.setPercentage(perc);
+			error = percentageErrorsService.save(error);
+
+			perc.setProgression(Double.valueOf(1));
+			perc.setPercentageErrors(Utils.asList(error));
+			return percentageService.save(perc, true);
+		}
+		if (Boolean.TRUE.equals(lobby.getClosed())) {
+			PercentageError error = new PercentageError();
+			error.setMessageKey(PercentageLogMessages.LOBBY_IS_CLOSED);
+			error.setExtraParam1(String.valueOf(params.getIntegerParam2()));
+			error.setPercentage(perc);
+			error = percentageErrorsService.save(error);
+
+			perc.setProgression(Double.valueOf(1));
+			perc.setPercentageErrors(Utils.asList(error));
+			return percentageService.save(perc, true);
+		}
+
 		User user = userRepository.getOne(params.getIntegerParam1());
 		if (!lobby.isFull() && !lobby.isUserAlreadyInside(user.getId())) {
 			if (lobby.getUserId1() == null) {
 				lobby.setUserId1(user.getId());
 				lobby.setLastInLobby1(Utils.now().getTime());
+				lobby.setColor1(PlayerColor.chooseRandomExcept(lobby.getColorsInUse()));
 				lobbyRepository.save(lobby);
 			} else if (lobby.getUserId2() == null) {
 				lobby.setUserId2(user.getId());
 				lobby.setLastInLobby2(Utils.now().getTime());
+				lobby.setColor2(PlayerColor.chooseRandomExcept(lobby.getColorsInUse()));
 				lobbyRepository.save(lobby);
 			} else if (lobby.getUserId3() == null) {
 				lobby.setUserId3(user.getId());
 				lobby.setLastInLobby3(Utils.now().getTime());
+				lobby.setColor3(PlayerColor.chooseRandomExcept(lobby.getColorsInUse()));
 				lobbyRepository.save(lobby);
 			} else if (lobby.getUserId4() == null) {
 				lobby.setUserId4(user.getId());
 				lobby.setLastInLobby4(Utils.now().getTime());
+				lobby.setColor4(PlayerColor.chooseRandomExcept(lobby.getColorsInUse()));
 				lobbyRepository.save(lobby);
 			}
 		}
@@ -78,6 +133,9 @@ public class LobbyService {
 		if (lobby == null || loggedUserId == null) {
 			return null;
 		}
+		if (lobby.isClosed()) {
+			return null;
+		}
 		if (loggedUserId.equals(lobby.getUserId1())) {
 			lobby.setLastInLobby1(lobby.getLastInLobby2());
 			lobby.setLastInLobby2(lobby.getLastInLobby3());
@@ -87,7 +145,10 @@ public class LobbyService {
 			lobby.setUserId2(lobby.getUserId3());
 			lobby.setUserId3(lobby.getUserId4());
 			lobby.setUserId4(null);
-			lobby = lobbyRepository.save(lobby);
+			lobby.setColor1(lobby.getColor2());
+			lobby.setColor2(lobby.getColor3());
+			lobby.setColor3(lobby.getColor4());
+			lobby.setColor4(null);
 		} else if (loggedUserId.equals(lobby.getUserId2())) {
 			lobby.setLastInLobby2(lobby.getLastInLobby3());
 			lobby.setLastInLobby3(lobby.getLastInLobby4());
@@ -95,19 +156,22 @@ public class LobbyService {
 			lobby.setUserId2(lobby.getUserId3());
 			lobby.setUserId3(lobby.getUserId4());
 			lobby.setUserId4(null);
-			lobby = lobbyRepository.save(lobby);
+			lobby.setColor2(lobby.getColor3());
+			lobby.setColor3(lobby.getColor4());
+			lobby.setColor4(null);
 		} else if (loggedUserId.equals(lobby.getUserId3())) {
 			lobby.setLastInLobby3(lobby.getLastInLobby4());
 			lobby.setLastInLobby4(null);
 			lobby.setUserId3(lobby.getUserId4());
 			lobby.setUserId4(null);
-			lobby = lobbyRepository.save(lobby);
+			lobby.setColor3(lobby.getColor4());
+			lobby.setColor4(null);
 		} else if (loggedUserId.equals(lobby.getUserId4())) {
 			lobby.setLastInLobby4(null);
 			lobby.setUserId4(null);
-			lobby = lobbyRepository.save(lobby);
+			lobby.setColor4(null);
 		}
-		return lobbyMapper.toDto(lobby);
+		return lobbyMapper.toDto(lobbyRepository.save(lobby));
 	}
 
 	public LobbyDto getOne(Long id) {
@@ -119,8 +183,8 @@ public class LobbyService {
 
 	public List<LobbyDto> findPaged(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
-		Page<Lobby> lobbies = this.lobbyRepository.findAll(pageable);
-		return lobbyMapper.toDto(lobbies.getContent());
+		List<Lobby> lobbies = this.lobbyRepository.findByClosedFalse(pageable.getOffset(), pageable.getPageSize());
+		return lobbyMapper.toDto(lobbies);
 	}
 
 	public long count() {
@@ -182,5 +246,23 @@ public class LobbyService {
 			return null;
 		}
 		return lobbyMapper.toDto(customRepository.searchLobbiesPaged(params));
+	}
+
+	public LobbyDto startGame(Long lobbyId, Long loggedUserId) {
+		if (lobbyId == null || loggedUserId == null) {
+			return null;
+		}
+		Lobby lobby = lobbyRepository.getOne(lobbyId);
+		if (!loggedUserId.equals(lobby.getUserId1())) {
+			return null;
+		}
+		lobby.setClosed(Boolean.TRUE);
+
+		PercentageQueryParams params = new PercentageQueryParams();
+		params.setIntegerParam1(lobbyId);
+		percentageService.prepareQueryParams(userRepository.getOne(loggedUserId), params,
+			PercentageOperation.START_GAME);
+
+		return lobbyMapper.toDto(lobbyRepository.save(lobby));
 	}
 }

@@ -47,7 +47,8 @@ public class QueryConstants {
 			+ "  SELECT l.*, 0 AS friends FROM lobby l \n"
 			+ "  WHERE l.lobby_type = 'PUBLIC' \n"
 			+ ")) lob \n"
-			+ "WHERE (lob.user_1_id IS NULL OR lob.user_2_id IS NULL OR lob.user_3_id IS NULL OR lob.user_4_id IS NULL) \n",
+			+ "WHERE (lob.user_1_id IS NULL OR lob.user_2_id IS NULL OR lob.user_3_id IS NULL OR lob.user_4_id IS NULL) \n"
+			+ "  AND lob.closed = FALSE \n",
 		"GROUP BY lob.id \n"
 			+ ", lob.user_1_id \n"
 			+ ", lob.user_2_id \n"

@@ -1,6 +1,8 @@
 package it.objectmethod.tatami.utils;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Utils {
 
@@ -27,5 +29,17 @@ public class Utils {
 			}
 		}
 		return item;
+	}
+
+	@SafeVarargs
+	public static <E> List<E> asList(E... items) {
+		if (items == null) {
+			return null;
+		}
+		List<E> itemList = new ArrayList<>();
+		for (E i : items) {
+			itemList.add(i);
+		}
+		return itemList;
 	}
 }

@@ -5,11 +5,9 @@ import com.sun.istack.NotNull;
 import lombok.Data;
 
 @Data
-public class LobbySearchQueryParams {
+public class LobbySearchQueryParams extends LobbyQueryParams {
 	@NotNull
 	private Long userId;
-	private String lobbyType;
-	private String name;
 	@NotNull
 	private Integer page;
 	@NotNull
