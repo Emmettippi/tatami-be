@@ -14,8 +14,8 @@ import it.objectmethod.tatami.entity.enums.GreenCardType;
 import lombok.Data;
 
 @Data
-//@Entity
-//@Table(name = "green_card")
+@Entity
+@Table(name = "green_card")
 public class GreenCard {
 
 	@Id
@@ -29,6 +29,13 @@ public class GreenCard {
 	@Column(name = "green_card_subtype")
 	@Enumerated(EnumType.STRING)
 	private GreenCardSubtype greenCardSubtype;
+
+	public void setGreenCardSubtype(GreenCardSubtype greenCardSubtype) {
+		this.greenCardSubtype = greenCardSubtype;
+		if (greenCardSubtype != null) {
+			this.greenCardType = greenCardSubtype.greenCardType();
+		}
+	}
 
 	@Column(name = "cost")
 	private Long cost;
