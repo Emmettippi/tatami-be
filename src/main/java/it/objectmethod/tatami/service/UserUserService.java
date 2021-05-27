@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.objectmethod.tatami.dto.UserUserDto;
-import it.objectmethod.tatami.dto.mapper.UserMapper;
 import it.objectmethod.tatami.dto.mapper.UserUserMapper;
 import it.objectmethod.tatami.entity.Percentage;
 import it.objectmethod.tatami.entity.PercentageQueryParams;
@@ -26,13 +25,9 @@ public class UserUserService {
 	@Autowired
 	private UserUserRepository userUserRepository;
 	@Autowired
-	private UserMapper userMapper;
-	@Autowired
 	private UserUserMapper userUserMapper;
 	@Autowired
 	private PercentageService percentageService;
-	@Autowired
-	private UserService userService;
 
 	public boolean askFriendship(Long askingUserId, Long loggedUserId) {
 		boolean blocked = false;
@@ -55,6 +50,19 @@ public class UserUserService {
 		return true;
 	}
 
+	public boolean cancelFriendshipRequest(Long relationId, Long loggedUserId) {
+		UserUser askingRelation = userUserRepository.getOne(relationId);
+		if (askingRelation == null || loggedUserId == null || (!loggedUserId.equals(askingRelation.getUser1().getId())
+			&& !loggedUserId.equals(askingRelation.getUser2().getId()))) {
+			return false;
+		}
+		UserUser pendingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
+			askingRelation.getUser2().getId(), askingRelation.getUser1().getId(), UserRelation.PENDING_FRIENDSHIP);
+		this.delete(pendingRelation.getId());
+		this.delete(askingRelation.getId());
+		return true;
+	}
+
 	public boolean acceptFriendship(Long relationId, Long loggedUserId) {
 		UserUser pendingRelation = userUserRepository.getOne(relationId);
 		if (pendingRelation == null || loggedUserId == null || (!loggedUserId.equals(pendingRelation.getUser1().getId())
@@ -67,6 +75,19 @@ public class UserUserService {
 		askingRelation.setRelationship(UserRelation.FRIEND);
 		userUserRepository.save(pendingRelation);
 		userUserRepository.save(askingRelation);
+		return true;
+	}
+
+	public boolean refuseFriendship(Long relationId, Long loggedUserId) {
+		UserUser pendingRelation = userUserRepository.getOne(relationId);
+		if (pendingRelation == null || loggedUserId == null || (!loggedUserId.equals(pendingRelation.getUser1().getId())
+			&& !loggedUserId.equals(pendingRelation.getUser2().getId()))) {
+			return false;
+		}
+		UserUser askingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
+			pendingRelation.getUser2().getId(), pendingRelation.getUser1().getId(), UserRelation.ASKING_FRIENDSHIP);
+		this.delete(pendingRelation.getId());
+		this.delete(askingRelation.getId());
 		return true;
 	}
 
