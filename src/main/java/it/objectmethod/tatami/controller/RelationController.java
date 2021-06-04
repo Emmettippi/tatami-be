@@ -30,35 +30,35 @@ public class RelationController {
 		return new ResponseEntity<>(Boolean.valueOf(result), result ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
 	}
 
-	@PostMapping("/cancel-friendship/{relationId}")
-	public ResponseEntity<Boolean> cancelFriendshipRequest(@PathVariable("relationId") Long askingRelationId,
+	@PostMapping("/cancel-friendship/{userId}")
+	public ResponseEntity<Boolean> cancelFriendshipRequest(@PathVariable("userId") Long userId,
 		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
 		Long loggedUserId = jwtService.getUserIdByToken(authToken);
-		boolean result = userUserService.cancelFriendshipRequest(askingRelationId, loggedUserId);
+		boolean result = userUserService.cancelFriendshipRequest(userId, loggedUserId);
 		return new ResponseEntity<>(Boolean.valueOf(result), result ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
 	}
 
-	@PostMapping("/accept-friendship/{relationId}")
-	public ResponseEntity<Boolean> acceptFriendship(@PathVariable("relationId") Long relationId,
+	@PostMapping("/accept-friendship/{userId}")
+	public ResponseEntity<Boolean> acceptFriendship(@PathVariable("userId") Long userId,
 		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
 		Long loggedUserId = jwtService.getUserIdByToken(authToken);
-		boolean result = userUserService.acceptFriendship(relationId, loggedUserId);
+		boolean result = userUserService.acceptFriendship(userId, loggedUserId);
 		return new ResponseEntity<>(Boolean.valueOf(result), result ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
 	}
 
-	@PostMapping("/refuse-friendship/{relationId}")
-	public ResponseEntity<Boolean> refuseFriendship(@PathVariable("relationId") Long relationId,
+	@PostMapping("/refuse-friendship/{userId}")
+	public ResponseEntity<Boolean> refuseFriendship(@PathVariable("userId") Long userId,
 		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
 		Long loggedUserId = jwtService.getUserIdByToken(authToken);
-		boolean result = userUserService.refuseFriendship(relationId, loggedUserId);
+		boolean result = userUserService.refuseFriendship(userId, loggedUserId);
 		return new ResponseEntity<>(Boolean.valueOf(result), result ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
 	}
 
-	@PostMapping("/remove-friendship/{relationId}")
-	public ResponseEntity<Boolean> removeFriendship(@PathVariable("relationId") Long relationId,
+	@PostMapping("/remove-friendship/{userId}")
+	public ResponseEntity<Boolean> removeFriendship(@PathVariable("userId") Long userId,
 		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
 		Long loggedUserId = jwtService.getUserIdByToken(authToken);
-		boolean result = userUserService.removeFriendship(relationId, loggedUserId);
+		boolean result = userUserService.removeFriendship(userId, loggedUserId);
 		return new ResponseEntity<>(Boolean.valueOf(result), result ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
 	}
 

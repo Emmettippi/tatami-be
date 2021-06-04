@@ -25,9 +25,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	@Query(nativeQuery = true, value = "SELECT u.* \n"
 		+ "FROM user_info u \n"
-		+ "  JOIN user_user uu ON u.id = uu.user_1_id \n"
+		+ "  JOIN user_user uu ON u.id = uu.user_2_id \n"
 		+ "WHERE uu.relationship = :relationShip \n"
-		+ "  AND u.id = :userId")
+		+ "  AND uu.user_1_id = :userId")
 	List<User> findByUserIdAndRelation(@Param("userId") Long user1Id, @Param("relationShip") String relationShip);
 
 	@Query(nativeQuery = true, value = "SELECT u.* \n"

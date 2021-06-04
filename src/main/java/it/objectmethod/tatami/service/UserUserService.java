@@ -50,10 +50,13 @@ public class UserUserService {
 		return true;
 	}
 
-	public boolean cancelFriendshipRequest(Long relationId, Long loggedUserId) {
-		UserUser askingRelation = userUserRepository.getOne(relationId);
-		if (askingRelation == null || loggedUserId == null || (!loggedUserId.equals(askingRelation.getUser1().getId())
-			&& !loggedUserId.equals(askingRelation.getUser2().getId()))) {
+	public boolean cancelFriendshipRequest(Long userId, Long loggedUserId) {
+		if (userId == null || loggedUserId == null) {
+			return false;
+		}
+		UserUser askingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(loggedUserId, userId,
+			UserRelation.ASKING_FRIENDSHIP);
+		if (askingRelation == null) {
 			return false;
 		}
 		UserUser pendingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
@@ -63,10 +66,13 @@ public class UserUserService {
 		return true;
 	}
 
-	public boolean acceptFriendship(Long relationId, Long loggedUserId) {
-		UserUser pendingRelation = userUserRepository.getOne(relationId);
-		if (pendingRelation == null || loggedUserId == null || (!loggedUserId.equals(pendingRelation.getUser1().getId())
-			&& !loggedUserId.equals(pendingRelation.getUser2().getId()))) {
+	public boolean acceptFriendship(Long userId, Long loggedUserId) {
+		if (userId == null || loggedUserId == null) {
+			return false;
+		}
+		UserUser pendingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(loggedUserId, userId,
+			UserRelation.PENDING_FRIENDSHIP);
+		if (pendingRelation == null) {
 			return false;
 		}
 		UserUser askingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
@@ -78,10 +84,13 @@ public class UserUserService {
 		return true;
 	}
 
-	public boolean refuseFriendship(Long relationId, Long loggedUserId) {
-		UserUser pendingRelation = userUserRepository.getOne(relationId);
-		if (pendingRelation == null || loggedUserId == null || (!loggedUserId.equals(pendingRelation.getUser1().getId())
-			&& !loggedUserId.equals(pendingRelation.getUser2().getId()))) {
+	public boolean refuseFriendship(Long userId, Long loggedUserId) {
+		if (userId == null || loggedUserId == null) {
+			return false;
+		}
+		UserUser pendingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(loggedUserId, userId,
+			UserRelation.PENDING_FRIENDSHIP);
+		if (pendingRelation == null) {
 			return false;
 		}
 		UserUser askingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
@@ -91,10 +100,13 @@ public class UserUserService {
 		return true;
 	}
 
-	public boolean removeFriendship(Long relationId, Long loggedUserId) {
-		UserUser relation = userUserRepository.getOne(relationId);
-		if (relation == null || loggedUserId == null || (!loggedUserId.equals(relation.getUser1().getId())
-			&& !loggedUserId.equals(relation.getUser2().getId()))) {
+	public boolean removeFriendship(Long userId, Long loggedUserId) {
+		if (userId == null || loggedUserId == null) {
+			return false;
+		}
+		UserUser relation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
+			loggedUserId, userId, UserRelation.FRIEND);
+		if (relation == null) {
 			return false;
 		}
 		UserUser friendRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
@@ -105,10 +117,23 @@ public class UserUserService {
 	}
 
 	public boolean blockUser(Long userId, Long loggedUserId) {
+		if (userId == null || loggedUserId == null) {
+			return false;
+		}
 		UserUser friendRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(loggedUserId, userId,
 			UserRelation.FRIEND);
 		if (friendRelation != null) {
-			this.removeFriendship(friendRelation.getId(), loggedUserId);
+			this.removeFriendship(userId, loggedUserId);
+		}
+		UserUser pendingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(loggedUserId, userId,
+			UserRelation.PENDING_FRIENDSHIP);
+		if (pendingRelation != null) {
+			this.refuseFriendship(userId, loggedUserId);
+		}
+		UserUser askingRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(loggedUserId, userId,
+			UserRelation.ASKING_FRIENDSHIP);
+		if (askingRelation != null) {
+			this.cancelFriendshipRequest(userId, loggedUserId);
 		}
 		UserUser blockRelation = new UserUser();
 		blockRelation.setRelationship(UserRelation.BLOCKED);
@@ -118,14 +143,16 @@ public class UserUserService {
 		return true;
 	}
 
-	public boolean unlockUser(Long relationId, Long loggedUserId) {
-		UserUser relation = userUserRepository.getOne(relationId);
-		if (relation == null || loggedUserId == null || (!loggedUserId.equals(relation.getUser1().getId())
-			&& !loggedUserId.equals(relation.getUser2().getId()))) {
+	public boolean unlockUser(Long userId, Long loggedUserId) {
+		if (userId == null || loggedUserId == null) {
 			return false;
 		}
-
-		this.delete(relationId);
+		UserUser relation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(loggedUserId, userId,
+			UserRelation.BLOCKED);
+		if (relation == null) {
+			return false;
+		}
+		this.delete(relation.getId());
 		return true;
 	}
 
