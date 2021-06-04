@@ -209,12 +209,11 @@ public class PercentageService {
 		perc.setProgressionStatus(PercentageStatus.NEW);
 		perc.setProgression(Double.valueOf(0));
 
+		perc = this.save(perc);
 		params.setPercentage(perc);
-		List<PercentageQueryParams> queryParamsLs = new ArrayList<>();
-		queryParamsLs.add(params);
-		perc.setPercentageQueryParams(queryParamsLs);
-		perc.setLocked(operation.forLock());
-		return this.save(perc);
+		percentageQueryParamsRepository.save(params);
+
+		return perc;
 	}
 
 	@Transactional

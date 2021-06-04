@@ -12,6 +12,6 @@ import it.objectmethod.tatami.entity.PercentageQueryParams;
 @Repository
 public interface PercentageQueryParamsRepository extends JpaRepository<PercentageQueryParams, Long> {
 
-	@Query(nativeQuery = true, value = "SELECT * FROM percentage_query_params WHERE percentage_id = percentageId")
+	@Query(nativeQuery = true, value = "SELECT * FROM percentage_query_params WHERE percentage_id = :percentageId")
 	List<PercentageQueryParams> findByPercentageId(@Param("percentageId") Long id);
 }

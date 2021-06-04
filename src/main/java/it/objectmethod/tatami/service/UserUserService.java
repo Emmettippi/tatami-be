@@ -14,6 +14,7 @@ import it.objectmethod.tatami.entity.User;
 import it.objectmethod.tatami.entity.UserUser;
 import it.objectmethod.tatami.entity.enums.PercentageOperation;
 import it.objectmethod.tatami.entity.enums.UserRelation;
+import it.objectmethod.tatami.repository.PercentageQueryParamsRepository;
 import it.objectmethod.tatami.repository.UserRepository;
 import it.objectmethod.tatami.repository.UserUserRepository;
 
@@ -28,6 +29,8 @@ public class UserUserService {
 	private UserUserMapper userUserMapper;
 	@Autowired
 	private PercentageService percentageService;
+	@Autowired
+	private PercentageQueryParamsRepository percentageQueryParamsRepository;
 
 	public boolean askFriendship(Long askingUserId, Long loggedUserId) {
 		boolean blocked = false;
@@ -157,7 +160,7 @@ public class UserUserService {
 	}
 
 	public Percentage handleFriendship(Percentage perc) {
-		PercentageQueryParams params = perc.getPercentageQueryParams().get(0);
+		PercentageQueryParams params = percentageQueryParamsRepository.findByPercentageId(perc.getId()).get(0);
 		List<UserUserDto> relations = new ArrayList<>();
 
 		UserUser blockedRelation = userUserRepository.findByUser1_IdAndUser2_IdAndRelationship(
