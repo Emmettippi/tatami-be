@@ -11,8 +11,10 @@ import com.auth0.jwt.interfaces.JWTVerifier;
 
 import it.objectmethod.tatami.entity.User;
 import it.objectmethod.tatami.utils.Utils;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class JWTService {
 
 	private static final String MY_SECRET_JWT_KEY = "orb-is-hide-and-bonus";
@@ -43,7 +45,7 @@ public class JWTService {
 			Long userId = decoded.getClaim("user_id").asLong();
 			String userName = decoded.getClaim("username").asString();
 
-			// System.out.println("Utente verificato! " + userId + " | " + userName);
+			log.debug("Utente verificato! " + userId + " | " + userName);
 			valid = true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -62,8 +64,7 @@ public class JWTService {
 			userId = decoded.getClaim("user_id").asLong();
 			String userName = decoded.getClaim("username").asString();
 
-			// System.out.println("Utente verificato! " + userId + " - " + userName);
-
+			log.debug("Utente verificato! " + userId + " - " + userName);
 		} catch (Exception e) {
 			e.printStackTrace();
 			userId = null;

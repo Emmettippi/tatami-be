@@ -22,7 +22,7 @@ public class CORSFilter implements Filter {
 		throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) servletRequest;
 		HttpServletResponse response = (HttpServletResponse) servletResponse;
-		String url = request.getRequestURI();
+		// String url = request.getRequestURI();
 		// System.out.println("CORS Filtering - " + url);
 
 		response.setHeader("Access-Control-Allow-Origin", "*");

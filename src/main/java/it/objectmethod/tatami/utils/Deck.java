@@ -10,7 +10,22 @@ public class Deck<E> extends ArrayList<E> {
 
 	private static final long serialVersionUID = 1L;
 
-	public Deck(E[] deck) {
+	@SafeVarargs
+	public static <E> Deck<E> of(E... deck) {
+		return new Deck<E>(deck);
+	}
+
+	public static <E> Deck<E> of(List<E> deck) {
+		return new Deck<E>(deck);
+	}
+
+	public Deck() {
+		super();
+		this.clear();
+	}
+
+	@SafeVarargs
+	public Deck(E... deck) {
 		super();
 		this.clear();
 		if (deck != null) {

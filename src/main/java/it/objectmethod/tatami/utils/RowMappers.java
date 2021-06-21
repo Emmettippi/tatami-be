@@ -27,6 +27,7 @@ public class RowMappers {
 				lobby.setUserId3(rs.getLong("user_3_id"));
 				lobby.setUserId4(rs.getLong("user_4_id"));
 				lobby.setLobbyName(rs.getString("lobby_name"));
+				lobby.setFriends(rs.getLong("sum_friends"));
 				String lobbyTypeStr = rs.getString("lobby_type");
 				if (!Utils.isBlank(lobbyTypeStr)) {
 					lobby.setLobbyType(LobbyType.valueOf(lobbyTypeStr));
