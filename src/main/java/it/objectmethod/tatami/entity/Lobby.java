@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import it.objectmethod.tatami.entity.enums.LobbyType;
 import it.objectmethod.tatami.entity.enums.PlayerColor;
@@ -80,6 +81,9 @@ public class Lobby {
 
 	@Column(name = "closed")
 	private Boolean closed;
+
+	@Transient
+	private Long friends;
 
 	public boolean isFull() {
 		return this.userId1 != null && this.userId2 != null && this.userId3 != null && this.userId4 != null;

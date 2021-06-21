@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import it.objectmethod.tatami.controller.dto.LobbyQueryParams;
 import it.objectmethod.tatami.controller.dto.LobbySearchQueryParams;
 import it.objectmethod.tatami.dto.LobbyDto;
+import it.objectmethod.tatami.dto.PercentageDto;
 import it.objectmethod.tatami.entity.enums.LobbyType;
 import it.objectmethod.tatami.service.JWTService;
 import it.objectmethod.tatami.service.LobbyService;
@@ -31,7 +33,7 @@ public class LobbyController {
 
 	@PostMapping("/create")
 	public ResponseEntity<LobbyDto> createLobby(@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken,
-		LobbyQueryParams lobbyParams) {
+		@RequestBody LobbyQueryParams lobbyParams) {
 		ResponseEntity<LobbyDto> resp;
 		Long loggedUserId = jwtService.getUserIdByToken(authToken);
 		if (lobbyParams == null) {
@@ -47,11 +49,11 @@ public class LobbyController {
 	}
 
 	@PostMapping("/join/{id}")
-	public ResponseEntity<Boolean> joinLobby(@PathVariable("id") Long lobbyId,
+	public ResponseEntity<PercentageDto> joinLobby(@PathVariable("id") Long lobbyId,
 		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
 		Long loggedUserId = jwtService.getUserIdByToken(authToken);
-		Boolean resp = lobbyService.joinLobby(lobbyId, loggedUserId);
-		return new ResponseEntity<>(resp, resp ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+		PercentageDto resp = lobbyService.joinLobby(lobbyId, loggedUserId);
+		return new ResponseEntity<>(resp, resp != null ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
 	}
 
 	@PostMapping("/set-visibility/{id}/{visibility}")

@@ -38,6 +38,8 @@ public class LobbyDto {
 	private Long gameId;
 	private Boolean closed;
 
+	private Long friends;
+
 	public boolean isFull() {
 		return this.userId1 != null && this.userId2 != null && this.userId3 != null && this.userId4 != null;
 	}
