@@ -5,6 +5,7 @@ import java.util.List;
 import org.mapstruct.Mapper;
 
 import it.objectmethod.tatami.dto.UserDto;
+import it.objectmethod.tatami.dto.UserEditDto;
 import it.objectmethod.tatami.entity.User;
 
 @Mapper(componentModel = "spring")
@@ -17,4 +18,6 @@ public abstract class UserMapper {
 	public abstract List<UserDto> toDto(List<User> user);
 
 	public abstract User toEntity(UserDto dto);
+
+	public abstract User toEntity(UserEditDto dto);
 }

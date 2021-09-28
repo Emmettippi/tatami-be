@@ -20,6 +20,7 @@ import it.objectmethod.tatami.controller.dto.LoginDto;
 import it.objectmethod.tatami.controller.dto.UserSearchQueryParams;
 import it.objectmethod.tatami.dto.MyRelationsDto;
 import it.objectmethod.tatami.dto.UserDto;
+import it.objectmethod.tatami.dto.UserEditDto;
 import it.objectmethod.tatami.dto.UserSearchResponseDto;
 import it.objectmethod.tatami.service.JWTService;
 import it.objectmethod.tatami.service.UserService;
@@ -47,7 +48,7 @@ public class UserController {
 	}
 
 	@PutMapping("/update")
-	public ResponseEntity<UserDto> update(@Validated @RequestBody UserDto body,
+	public ResponseEntity<UserDto> update(@Validated @RequestBody UserEditDto body,
 		@RequestHeader(Utils.TATAMI_AUTH_TOKEN) String authToken) {
 		ResponseEntity<UserDto> resp;
 		Long loggedUserId = jwtService.getUserIdByToken(authToken);

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import it.objectmethod.tatami.controller.dto.LoginDto;
 import it.objectmethod.tatami.controller.dto.UserSearchQueryParams;
 import it.objectmethod.tatami.dto.UserDto;
+import it.objectmethod.tatami.dto.UserEditDto;
 import it.objectmethod.tatami.dto.UserSearchResponseDto;
 import it.objectmethod.tatami.dto.mapper.UserMapper;
 import it.objectmethod.tatami.entity.User;
@@ -67,12 +68,19 @@ public class UserService {
 		return userMapper.toDto(userRepository.save(entity));
 	}
 
-	public UserDto update(UserDto dto, boolean isOnline) {
+	public UserDto update(UserEditDto dto, boolean isOnline) {
 		User user = null;
 		user = userMapper.toEntity(dto);
+		User oldUser = userRepository.getOne(dto.getId());
 		if (!Utils.isBlank(dto.getNewPassword())) {
+			String md5OldPass = userRepository.md5Password(dto.getPassword());
+			if (md5OldPass == null || oldUser == null || !md5OldPass.equals(oldUser.getPassword())) {
+				return null;
+			}
 			String md5NewPass = userRepository.md5Password(dto.getNewPassword());
 			user.setPassword(md5NewPass);
+		} else {
+			user.setPassword(oldUser.getPassword());
 		}
 		if (isOnline) {
 			user.setUserStatus(UserStatus.ONLINE);
